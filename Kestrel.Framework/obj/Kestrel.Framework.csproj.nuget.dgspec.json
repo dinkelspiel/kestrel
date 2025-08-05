@@ -1,0 +1,77 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj": {}
+  },
+  "projects": {
+    "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj",
+        "projectName": "Kestrel.Framework",
+        "projectPath": "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj",
+        "packagesPath": "/home/keii/.nuget/packages/",
+        "outputPath": "/home/keii/Coding/voxel/Kestrel.Framework/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/keii/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Silk.NET": {
+              "target": "Package",
+              "version": "[2.22.0, )"
+            },
+            "Silk.NET.OpenGL": {
+              "target": "Package",
+              "version": "[2.22.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.15, 8.0.15]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
