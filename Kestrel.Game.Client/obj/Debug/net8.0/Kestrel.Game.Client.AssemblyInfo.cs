@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Kestrel.Game.Client")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+09f4a67af58519a110f6ba41e000c777123c5818")]
 [assembly: System.Reflection.AssemblyProductAttribute("Kestrel.Game.Client")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Kestrel.Game.Client")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

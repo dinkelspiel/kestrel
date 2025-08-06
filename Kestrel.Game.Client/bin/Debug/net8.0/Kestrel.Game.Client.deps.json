@@ -15,6 +15,14 @@
           "Kestrel.Game.Client.dll": {}
         }
       },
+      "GlmSharp/0.9.8": {
+        "runtime": {
+          "lib/Net45/GlmSharp.dll": {
+            "assemblyVersion": "0.9.8.0",
+            "fileVersion": "0.9.8.0"
+          }
+        }
+      },
       "ImGui.NET/1.91.6.1": {
         "dependencies": {
           "System.Buffers": "4.5.1",
@@ -231,6 +239,14 @@
           }
         }
       },
+      "StbImageSharp/2.30.15": {
+        "runtime": {
+          "lib/netstandard2.0/StbImageSharp.dll": {
+            "assemblyVersion": "2.30.15.0",
+            "fileVersion": "2.30.15.0"
+          }
+        }
+      },
       "System.Buffers/4.5.1": {},
       "System.Memory/4.5.5": {},
       "System.Numerics.Vectors/4.5.0": {},
@@ -271,27 +287,32 @@
           "runtimes/win-arm64/native/glfw3.dll": {
             "rid": "win-arm64",
             "assetType": "native",
-            "fileVersion": "0.0.0.0"
+            "fileVersion": "3.4.0.0"
           },
           "runtimes/win-x64/native/glfw3.dll": {
             "rid": "win-x64",
             "assetType": "native",
-            "fileVersion": "0.0.0.0"
+            "fileVersion": "3.4.0.0"
           },
           "runtimes/win-x86/native/glfw3.dll": {
             "rid": "win-x86",
             "assetType": "native",
-            "fileVersion": "0.0.0.0"
+            "fileVersion": "3.4.0.0"
           }
         }
       },
       "Kestrel.Framework/1.0.0": {
         "dependencies": {
+          "GlmSharp": "0.9.8",
           "Silk.NET": "2.22.0",
-          "Silk.NET.OpenGL": "2.22.0"
+          "Silk.NET.OpenGL": "2.22.0",
+          "StbImageSharp": "2.30.15"
         },
         "runtime": {
-          "Kestrel.Framework.dll": {}
+          "Kestrel.Framework.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }
@@ -301,6 +322,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "GlmSharp/0.9.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-09/3MF8WhtFwfrE7bHwzhDhVTAQB2OvbzNVHLT8NFwNIdnGrud6PcyplHBxOaw2MMsgfm2cYsgwkj1YGttupwg==",
+      "path": "glmsharp/0.9.8",
+      "hashPath": "glmsharp.0.9.8.nupkg.sha512"
     },
     "ImGui.NET/1.91.6.1": {
       "type": "package",
@@ -427,6 +455,13 @@
       "sha512": "sha512-hBNxNSLvx/jdfvbU6oCsXcgLfqf9hMlEc6Mq/rllJ0eUTLloacuOZHTM8V702QGf7hOR+Mo4bTFqTqBnC0CM7g==",
       "path": "silk.net.windowing.glfw/2.22.0",
       "hashPath": "silk.net.windowing.glfw.2.22.0.nupkg.sha512"
+    },
+    "StbImageSharp/2.30.15": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-7QqbupVhz2kcFUPTgMw4iHR9rYDHGundzzee19Mwmd1typ2Lnv8EVJcLJxlkeBM2+4ex0NwsMtdbGSJctp1XCQ==",
+      "path": "stbimagesharp/2.30.15",
+      "hashPath": "stbimagesharp.2.30.15.nupkg.sha512"
     },
     "System.Buffers/4.5.1": {
       "type": "package",
