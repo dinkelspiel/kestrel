@@ -1,8 +1,7 @@
-namespace Kestrel.Framework.Graphics;
+namespace Kestrel.Framework.Client.Graphics;
 
 using Silk.NET.Maths;
 using Silk.NET.Input;
-using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 

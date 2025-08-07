@@ -1,6 +1,6 @@
 using Silk.NET.OpenGL;
 
-namespace Kestrel.Framework.Graphics.Shaders;
+namespace Kestrel.Framework.Client.Graphics.Shaders;
 
 public class ShaderProgram
 {

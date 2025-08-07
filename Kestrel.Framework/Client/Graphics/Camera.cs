@@ -1,13 +1,13 @@
+namespace Kestrel.Framework.Client.Graphics;
+
 using System.Numerics;
 using GlmSharp;
 using Silk.NET.Input;
 using Silk.NET.Vulkan;
 
-namespace Kestrel.Framework.Graphics;
-
 public class Camera
 {
-    public vec3 position = new(0.0f, 0.0f, 0.0f);
+    ClientState clientState;
     public vec3 front = new(0.0f, 0.0f, -1.0f);
     public vec3 up = new(0.0f, 1.0f, 0.0f);
 
@@ -15,8 +15,10 @@ public class Camera
     float lastX = 400, lastY = 300;
     float yaw = -90.0f, pitch = 0.0f;
 
-    public Camera()
+    public Camera(ClientState clientState)
     {
+        this.clientState = clientState;
+
         direction.x = MathF.Cos(glm.Radians(yaw));
         direction.y = MathF.Sin(glm.Radians(pitch));
         direction.z = MathF.Sin(glm.Radians(yaw));
@@ -26,7 +28,7 @@ public class Camera
     {
         get
         {
-            return mat4.LookAt(position, position + front, up);
+            return mat4.LookAt(clientState.Player.Location, clientState.Player.Location + front, up);
         }
     }
 

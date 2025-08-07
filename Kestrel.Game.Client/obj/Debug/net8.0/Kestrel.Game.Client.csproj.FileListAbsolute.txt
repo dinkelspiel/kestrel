@@ -91,3 +91,4 @@ D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\obj\Debug\net8.0\Kestrel.G
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\obj\Debug\net8.0\ref\Kestrel.Game.Client.dll
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\StbImageSharp.dll
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\GlmSharp.dll
+D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\LiteNetLib.dll

@@ -1,11 +1,12 @@
 using GlmSharp;
-using Kestrel.Framework.Graphics.Shaders;
+using Kestrel.Framework.Client.Graphics.Shaders;
+using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using StbImageSharp;
 
-namespace Kestrel.Framework.Graphics.Buffers;
+namespace Kestrel.Framework.Client.Graphics.Buffers;
 
 public class QuadMesh
 {
@@ -128,7 +129,7 @@ public class QuadMesh
         clientState.Window.GL.BindTexture(TextureTarget.Texture2D, _texture);
         _shader.Use();
 
-        mat4 projection = mat4.Perspective(glm.Radians(45.0f), (float)clientState.Window.Width / (float)clientState.Window.Height, 0.1f, 100.0f);
+        mat4 projection = mat4.Perspective(glm.Radians(90.0f), (float)clientState.Window.Width / (float)clientState.Window.Height, 0.1f, 100.0f);
 
         fixed (float* matrixPtr = clientState.Camera.View.Values1D)
         {
@@ -153,6 +154,16 @@ public class QuadMesh
 
                 clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
             }
+        }
+
+        foreach (ClientPlayer player in clientState.Players.Values)
+        {
+            vec3 pos = player.Location;
+            mat4 model = mat4.Identity * mat4.Translate(pos);
+            fixed (float* ptr = model.Values1D)
+                clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+
+            clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
         }
 
         clientState.Window.GL.BindVertexArray(0);
