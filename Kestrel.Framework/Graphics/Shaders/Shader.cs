@@ -1,7 +1,7 @@
 using Kestrel.Framework.Utils;
 using Silk.NET.OpenGL;
 
-namespace Kestrel.Framework.Shaders;
+namespace Kestrel.Framework.Graphics.Shaders;
 
 public class Shader
 {

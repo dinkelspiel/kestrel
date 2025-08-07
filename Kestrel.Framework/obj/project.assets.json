@@ -2,6 +2,19 @@
   "version": 3,
   "targets": {
     "net8.0": {
+      "GlmSharp/0.9.8": {
+        "type": "package",
+        "compile": {
+          "lib/Net45/GlmSharp.dll": {
+            "related": ".XML"
+          }
+        },
+        "runtime": {
+          "lib/Net45/GlmSharp.dll": {
+            "related": ".XML"
+          }
+        }
+      },
       "Microsoft.CSharp/4.7.0": {
         "type": "package",
         "compile": {
@@ -257,6 +270,15 @@
           }
         }
       },
+      "StbImageSharp/2.30.15": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/StbImageSharp.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/StbImageSharp.dll": {}
+        }
+      },
       "System.Buffers/4.5.1": {
         "type": "package",
         "compile": {
@@ -387,6 +409,21 @@
     }
   },
   "libraries": {
+    "GlmSharp/0.9.8": {
+      "sha512": "09/3MF8WhtFwfrE7bHwzhDhVTAQB2OvbzNVHLT8NFwNIdnGrud6PcyplHBxOaw2MMsgfm2cYsgwkj1YGttupwg==",
+      "type": "package",
+      "path": "glmsharp/0.9.8",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "glmsharp.0.9.8.nupkg.sha512",
+        "glmsharp.nuspec",
+        "lib/Net20/GlmSharp.XML",
+        "lib/Net20/GlmSharp.dll",
+        "lib/Net45/GlmSharp.XML",
+        "lib/Net45/GlmSharp.dll"
+      ]
+    },
     "Microsoft.CSharp/4.7.0": {
       "sha512": "pTj+D3uJWyN3My70i2Hqo+OXixq3Os2D1nJ2x92FFo6sk8fYS1m1WLNTs0Dc1uPaViH0YvEEwvzddQ7y4rhXmA==",
       "type": "package",
@@ -786,6 +823,19 @@
         "silkdotnet_v3.png"
       ]
     },
+    "StbImageSharp/2.30.15": {
+      "sha512": "7QqbupVhz2kcFUPTgMw4iHR9rYDHGundzzee19Mwmd1typ2Lnv8EVJcLJxlkeBM2+4ex0NwsMtdbGSJctp1XCQ==",
+      "type": "package",
+      "path": "stbimagesharp/2.30.15",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net471/StbImageSharp.dll",
+        "lib/netstandard2.0/StbImageSharp.dll",
+        "stbimagesharp.2.30.15.nupkg.sha512",
+        "stbimagesharp.nuspec"
+      ]
+    },
     "System.Buffers/4.5.1": {
       "sha512": "Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg==",
       "type": "package",
@@ -1047,29 +1097,38 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "GlmSharp >= 0.9.8",
       "Silk.NET >= 2.22.0",
-      "Silk.NET.OpenGL >= 2.22.0"
+      "Silk.NET.OpenGL >= 2.22.0",
+      "StbImageSharp >= 2.30.15"
     ]
   },
   "packageFolders": {
-    "/home/keii/.nuget/packages/": {}
+    "C:\\Users\\wille\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj",
+      "projectUniqueName": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\Kestrel.Framework.csproj",
       "projectName": "Kestrel.Framework",
-      "projectPath": "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj",
-      "packagesPath": "/home/keii/.nuget/packages/",
-      "outputPath": "/home/keii/Coding/voxel/Kestrel.Framework/obj/",
+      "projectPath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\Kestrel.Framework.csproj",
+      "packagesPath": "C:\\Users\\wille\\.nuget\\packages\\",
+      "outputPath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "/home/keii/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\wille\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1082,12 +1141,22 @@
         "warnAsError": [
           "NU1605"
         ]
-      }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "all"
+      },
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net8.0": {
         "targetAlias": "net8.0",
         "dependencies": {
+          "GlmSharp": {
+            "target": "Package",
+            "version": "[0.9.8, )"
+          },
           "Silk.NET": {
             "target": "Package",
             "version": "[2.22.0, )"
@@ -1095,6 +1164,10 @@
           "Silk.NET.OpenGL": {
             "target": "Package",
             "version": "[2.22.0, )"
+          },
+          "StbImageSharp": {
+            "target": "Package",
+            "version": "[2.30.15, )"
           }
         },
         "imports": [
@@ -1108,19 +1181,45 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.15, 8.0.15]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'System.Text.Json' 8.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-8g4q-xg66-9fp4",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'System.Text.Json' 8.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-hh2w-p6rv-4g7w",
+      "libraryId": "System.Text.Json",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'GlmSharp 0.9.8' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "libraryId": "GlmSharp",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
 }

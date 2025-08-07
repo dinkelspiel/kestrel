@@ -1,6 +1,6 @@
 using Silk.NET.OpenGL;
 
-namespace Kestrel.Framework.Shaders;
+namespace Kestrel.Framework.Graphics.Shaders;
 
 public class ShaderProgram
 {
@@ -52,5 +52,10 @@ public class ShaderProgram
     public void Use()
     {
         gl.UseProgram(GlProgram);
+    }
+
+    public int GetUniformLocation(String uniform)
+    {
+        return gl.GetUniformLocation(GlProgram, uniform);
     }
 }
