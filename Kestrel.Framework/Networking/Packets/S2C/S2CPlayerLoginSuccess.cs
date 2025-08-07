@@ -58,6 +58,11 @@ public class S2CPlayerLoginSuccess : IS2CPacket
         context.Player.Location = new vec3(Position.X, Position.X, Position.Y);
         foreach (var player in Players)
         {
+            if (player.Name == context.Player.Name)
+            {
+                continue; // Skip self
+            }
+
             context.Players.Add(player.Name, new ClientPlayer
             {
                 Name = player.Name,
