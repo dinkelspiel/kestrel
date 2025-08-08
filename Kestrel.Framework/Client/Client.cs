@@ -121,7 +121,7 @@ public class Client
     private void OnUpdate(double deltaTime)
     {
         var _keyboard = _input.Keyboards[0];
-        const float cameraSpeed = 0.05f;
+        float cameraSpeed = 15.0f * (float)deltaTime;
 
         bool playerMoved = false;
         if (_keyboard.IsKeyPressed(Key.W))

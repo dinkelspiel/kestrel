@@ -28,17 +28,17 @@ public class ChunkMesh(ClientState clientState, Chunk chunk)
                         continue;
 
                     if (chunk.GetBlock(x, y + 1, z) == BlockType.Air)
-                        mesher.AddTopFace(x, y, z);
+                        mesher.AddUpFace(x, y, z);
                     if (chunk.GetBlock(x, y - 1, z) == BlockType.Air)
-                        mesher.AddBottomFace(x, y, z);
+                        mesher.AddDownFace(x, y, z);
                     if (chunk.GetBlock(x + 1, y, z) == BlockType.Air)
-                        mesher.AddRightFace(x, y, z);
+                        mesher.AddEastFace(x, y, z);
                     if (chunk.GetBlock(x - 1, y, z) == BlockType.Air)
-                        mesher.AddLeftFace(x, y, z);
+                        mesher.AddWestFace(x, y, z);
                     if (chunk.GetBlock(x, y, z + 1) == BlockType.Air)
-                        mesher.AddFrontFace(x, y, z);
+                        mesher.AddNorthFace(x, y, z);
                     if (chunk.GetBlock(x, y, z - 1) == BlockType.Air)
-                        mesher.AddBackFace(x, y, z);
+                        mesher.AddSouthFace(x, y, z);
                 }
             }
         }
@@ -47,11 +47,14 @@ public class ChunkMesh(ClientState clientState, Chunk chunk)
         fixed (float* buf = Vertices)
             clientState.Window.GL.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(Vertices.Length * sizeof(float)), buf, BufferUsageARB.StaticDraw);
 
-        clientState.Window.GL.EnableVertexAttribArray(1);
-        clientState.Window.GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
         clientState.Window.GL.EnableVertexAttribArray(0);
-        clientState.Window.GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 5 * sizeof(float), (void*)0);
+        clientState.Window.GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), (void*)0);
+
+        clientState.Window.GL.EnableVertexAttribArray(1);
+        clientState.Window.GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+        clientState.Window.GL.EnableVertexAttribArray(2);
+        clientState.Window.GL.VertexAttribPointer(2, 1, VertexAttribPointerType.Float, false, 6 * sizeof(float), (void*)(5 * sizeof(float)));
 
         // Clean up
         clientState.Window.GL.BindVertexArray(0);
