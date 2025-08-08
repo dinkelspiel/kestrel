@@ -17,6 +17,7 @@ public class QuadMesh
     private static uint _texture;
     Chunk chunk;
     World.World world;
+    Mesher mesher;
 
     public unsafe QuadMesh(ClientState clientState, ShaderProgram shader)
     {
@@ -28,61 +29,38 @@ public class QuadMesh
         _vao = clientState.Window.GL.GenVertexArray();
         clientState.Window.GL.BindVertexArray(_vao);
 
-        float[] vertices =
+        mesher = new();
+        for (int x = 0; x < world.ChunkSize; x++)
         {
-            // positions         // texture coords
-            // front face
-            -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-             0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-             0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+            for (int y = 0; y < world.ChunkSize; y++)
+            {
+                for (int z = 0; z < world.ChunkSize; z++)
+                {
+                    if (chunk.GetBlock(x, y, z) == BlockType.Air)
+                        continue;
 
-            // back face
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-             0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-            // left face
-            -0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-            -0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-            -0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-
-            // right face
-             0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f, 1.0f, 1.0f,
-             0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-             0.5f,  0.5f, -0.5f, 0.0f, 0.0f,
-             0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-
-            // bottom face
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-             0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-             0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-             0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
-            -0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-            // top face
-            -0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
-            -0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
-             0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-             0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
-             0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
-            -0.5f,  0.5f, -0.5f, 0.0f, 1.0f
-        };
+                    if (chunk.GetBlock(x, y + 1, z) == BlockType.Air)
+                        mesher.AddTopFace(x, y, z);
+                    if (chunk.GetBlock(x, y - 1, z) == BlockType.Air)
+                        mesher.AddBottomFace(x, y, z);
+                    if (chunk.GetBlock(x + 1, y, z) == BlockType.Air)
+                        mesher.AddRightFace(x, y, z);
+                    if (chunk.GetBlock(x - 1, y, z) == BlockType.Air)
+                        mesher.AddLeftFace(x, y, z);
+                    if (chunk.GetBlock(x, y, z + 1) == BlockType.Air)
+                        mesher.AddFrontFace(x, y, z);
+                    if (chunk.GetBlock(x, y, z - 1) == BlockType.Air)
+                        mesher.AddBackFace(x, y, z);
+                }
+            }
+        }
+        mesher.AddBackFace(0, 0, 0);
+        Console.WriteLine($"Vertices: {mesher.Vertices.Count}");
 
         _vbo = clientState.Window.GL.GenBuffer();
         clientState.Window.GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
 
+        float[] vertices = mesher.Vertices.ToArray();
         fixed (float* buf = vertices)
             clientState.Window.GL.BufferData(BufferTargetARB.ArrayBuffer, (nuint)(vertices.Length * sizeof(float)), buf, BufferUsageARB.StaticDraw);
 
@@ -138,34 +116,41 @@ public class QuadMesh
         }
 
 
-        for (int x = 0; x < world.ChunkSize; x++)
-        {
-            for (int y = 0; y < world.ChunkSize; y++)
-            {
-                for (int z = 0; z < world.ChunkSize; z++)
-                {
-                    if (chunk.GetBlock(x, y, z) == BlockType.Air)
-                        continue;
 
-                    vec3 pos = new(x, y, z);
-                    mat4 model = mat4.Identity * mat4.Translate(pos);
-                    fixed (float* ptr = model.Values1D)
-                        clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+        vec3 pos = new(0, 0, 0);
+        mat4 model = mat4.Identity * mat4.Translate(pos);
+        fixed (float* ptr = model.Values1D)
+            clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
 
-                    clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-                }
-            }
-        }
+        clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, (uint)mesher.Vertices.Count / 5);
+        // for (int x = 0; x < world.ChunkSize; x++)
+        // {
+        //     for (int y = 0; y < world.ChunkSize; y++)
+        //     {
+        //         for (int z = 0; z < world.ChunkSize; z++)
+        //         {
+        //             if (chunk.GetBlock(x, y, z) == BlockType.Air)
+        //                 continue;
 
-        foreach (ClientPlayer player in clientState.Players.Values)
-        {
-            vec3 pos = player.Location;
-            mat4 model = mat4.Identity * mat4.Translate(pos);
-            fixed (float* ptr = model.Values1D)
-                clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+        //             vec3 pos = new(x, y, z);
+        //             mat4 model = mat4.Identity * mat4.Translate(pos);
+        //             fixed (float* ptr = model.Values1D)
+        //                 clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
 
-            clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-        }
+        //             clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+        //         }
+        //     }
+        // }
+
+        // foreach (ClientPlayer player in clientState.Players.Values)
+        // {
+        //     vec3 pos = player.Location;
+        //     mat4 model = mat4.Identity * mat4.Translate(pos);
+        //     fixed (float* ptr = model.Values1D)
+        //         clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+
+        //     clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+        // }
 
         clientState.Window.GL.BindVertexArray(0);
         // clientState.Window.GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);

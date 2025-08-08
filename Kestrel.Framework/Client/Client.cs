@@ -85,6 +85,11 @@ public class Client
         _gl.Enable(EnableCap.DepthTest);
         _gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         _gl.PolygonMode(GLEnum.FrontAndBack, GLEnum.Line);
+        clientState.Window.GL.Enable(GLEnum.CullFace);
+        clientState.Window.GL.CullFace(GLEnum.Back);
+
+        // Tell GL which triangle winding is considered "front"
+        clientState.Window.GL.FrontFace(GLEnum.Ccw);
 
         // Networking
 

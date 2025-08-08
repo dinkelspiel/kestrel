@@ -28,7 +28,7 @@ public class Chunk
             y < 0 || y >= world.ChunkSize ||
             z < 0 || z >= world.ChunkSize)
         {
-            throw new ArgumentOutOfRangeException("Coordinates are out of chunk bounds.");
+            return BlockType.Air;
         }
         return Blocks[ChunkToIndex(x, y, z)];
     }
