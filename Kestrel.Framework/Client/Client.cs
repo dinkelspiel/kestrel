@@ -84,6 +84,7 @@ public class Client
         _gl.Enable(EnableCap.Blend);
         _gl.Enable(EnableCap.DepthTest);
         _gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        _gl.PolygonMode(GLEnum.FrontAndBack, GLEnum.Line);
 
         // Networking
 

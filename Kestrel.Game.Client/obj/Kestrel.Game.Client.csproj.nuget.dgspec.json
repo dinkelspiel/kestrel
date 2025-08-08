@@ -144,6 +144,12 @@
             "ImGui.NET": {
               "target": "Package",
               "version": "[1.91.6.1, )"
+            },
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.11, )",
+              "autoReferenced": true
             }
           },
           "imports": [

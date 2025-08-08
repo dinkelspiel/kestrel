@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ZZHaSeM3FOQ=",
+  "dgSpecHash": "0MzlWIsYccI=",
   "success": true,
   "projectFilePath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Game.Client\\Kestrel.Game.Client.csproj",
   "expectedPackageFiles": [
@@ -10,6 +10,7 @@
     "C:\\Users\\wille\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\microsoft.dotnet.platformabstractions\\3.1.6\\microsoft.dotnet.platformabstractions.3.1.6.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\microsoft.extensions.dependencymodel\\8.0.0\\microsoft.extensions.dependencymodel.8.0.0.nupkg.sha512",
+    "C:\\Users\\wille\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.11\\microsoft.net.illink.tasks.8.0.11.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\silk.net\\2.22.0\\silk.net.2.22.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\silk.net.core\\2.22.0\\silk.net.core.2.22.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\silk.net.glfw\\2.22.0\\silk.net.glfw.2.22.0.nupkg.sha512",

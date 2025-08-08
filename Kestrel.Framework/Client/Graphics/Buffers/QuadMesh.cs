@@ -2,6 +2,7 @@ using GlmSharp;
 using Kestrel.Framework.Client.Graphics.Shaders;
 using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
+using Kestrel.Framework.World;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using StbImageSharp;
@@ -14,9 +15,14 @@ public class QuadMesh
     private ShaderProgram _shader;
     private ClientState clientState;
     private static uint _texture;
+    Chunk chunk;
+    World.World world;
 
     public unsafe QuadMesh(ClientState clientState, ShaderProgram shader)
     {
+        world = new();
+        this.chunk = new(world, 0, 0, 0);
+
         this.clientState = clientState;
         this._shader = shader;
         _vao = clientState.Window.GL.GenVertexArray();
@@ -73,17 +79,6 @@ public class QuadMesh
              0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
             -0.5f,  0.5f, -0.5f, 0.0f, 1.0f
         };
-
-        uint[] indices = {
-            0, 1, 3,
-            1, 2, 3
-        };
-
-        uint _ebo = clientState.Window.GL.GenBuffer();
-        clientState.Window.GL.BindBuffer(BufferTargetARB.ElementArrayBuffer, _ebo);
-
-        fixed (uint* buf = indices)
-            clientState.Window.GL.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(indices.Length * sizeof(uint)), buf, BufferUsageARB.StaticDraw);
 
         _vbo = clientState.Window.GL.GenBuffer();
         clientState.Window.GL.BindBuffer(BufferTargetARB.ArrayBuffer, _vbo);
@@ -143,16 +138,22 @@ public class QuadMesh
         }
 
 
-        for (int x = 0; x < 20; x++)
+        for (int x = 0; x < world.ChunkSize; x++)
         {
-            for (int y = 0; y < 20; y++)
+            for (int y = 0; y < world.ChunkSize; y++)
             {
-                vec3 pos = new(x, -1.0f, y);
-                mat4 model = mat4.Identity * mat4.Translate(pos);
-                fixed (float* ptr = model.Values1D)
-                    clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+                for (int z = 0; z < world.ChunkSize; z++)
+                {
+                    if (chunk.GetBlock(x, y, z) == BlockType.Air)
+                        continue;
 
-                clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+                    vec3 pos = new(x, y, z);
+                    mat4 model = mat4.Identity * mat4.Translate(pos);
+                    fixed (float* ptr = model.Values1D)
+                        clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+
+                    clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+                }
             }
         }
 
