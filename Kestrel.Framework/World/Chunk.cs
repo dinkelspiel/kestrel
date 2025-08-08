@@ -2,7 +2,7 @@ namespace Kestrel.Framework.World;
 
 public class Chunk
 {
-    private World world;
+    public World World;
     public BlockType[] Blocks = [];
     public int ChunkX, ChunkY, ChunkZ;
 
@@ -11,7 +11,7 @@ public class Chunk
         this.ChunkX = cx;
         this.ChunkY = cy;
         this.ChunkZ = cz;
-        this.world = world;
+        this.World = world;
         Blocks = new BlockType[world.ChunkSize * world.ChunkSize * world.ChunkSize];
 
         for (int i = 0; i < world.ChunkSize * world.ChunkSize * world.ChunkSize; i++)
@@ -22,34 +22,34 @@ public class Chunk
         }
     }
 
-    public BlockType GetBlock(int x, int y, int z)
+    public BlockType? GetBlock(int x, int y, int z)
     {
-        if (x < 0 || x >= world.ChunkSize ||
-            y < 0 || y >= world.ChunkSize ||
-            z < 0 || z >= world.ChunkSize)
+        if (x < 0 || x >= World.ChunkSize ||
+            y < 0 || y >= World.ChunkSize ||
+            z < 0 || z >= World.ChunkSize)
         {
-            return BlockType.Air;
+            return null;
         }
         return Blocks[ChunkToIndex(x, y, z)];
     }
 
     public int ChunkToIndex(int x, int y, int z)
     {
-        return x + y * world.ChunkSize + z * world.ChunkSize * world.ChunkSize;
+        return x + y * World.ChunkSize + z * World.ChunkSize * World.ChunkSize;
     }
 
     public (int x, int y, int z) IndexToChunk(int index)
     {
-        int x = index % world.ChunkSize;
-        int y = (index / world.ChunkSize) % world.ChunkSize;
-        int z = index / (world.ChunkSize * world.ChunkSize);
+        int x = index % World.ChunkSize;
+        int y = index / World.ChunkSize % World.ChunkSize;
+        int z = index / (World.ChunkSize * World.ChunkSize);
         return (x, y, z);
     }
 
     public (int wx, int wy, int wz) ChunkToWorld(int x, int y, int z)
     {
-        return (ChunkX * world.ChunkSize + x,
-                ChunkY * world.ChunkSize + y,
-                ChunkZ * world.ChunkSize + z);
+        return (ChunkX * World.ChunkSize + x,
+                ChunkY * World.ChunkSize + y,
+                ChunkZ * World.ChunkSize + z);
     }
 }
