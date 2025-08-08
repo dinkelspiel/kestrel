@@ -17,6 +17,7 @@ public class QuadMesh
     World.World world;
     ChunkMesh mesh1;
     ChunkMesh mesh2;
+    CubeMesh cube;
 
     public unsafe QuadMesh(ClientState clientState, ShaderProgram shader)
     {
@@ -51,6 +52,8 @@ public class QuadMesh
         mesh1.Generate();
         mesh2 = new(clientState, chunk2);
         mesh2.Generate();
+        cube = new(clientState);
+        cube.Generate();
     }
 
     public unsafe void Draw()
@@ -106,15 +109,16 @@ public class QuadMesh
         //     }
         // }
 
-        // foreach (ClientPlayer player in clientState.Players.Values)
-        // {
-        //     vec3 pos = player.Location;
-        //     mat4 model = mat4.Identity * mat4.Translate(pos);
-        //     fixed (float* ptr = model.Values1D)
-        //         clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+        cube.Bind();
+        foreach (ClientPlayer player in clientState.Players.Values)
+        {
+            pos = player.Location;
+            model = mat4.Identity * mat4.Translate(pos);
+            fixed (float* ptr = model.Values1D)
+                clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
 
-        //     clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-        // }
+            clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+        }
 
         clientState.Window.GL.BindVertexArray(0);
         // clientState.Window.GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);

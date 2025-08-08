@@ -3,10 +3,8 @@ using Silk.NET.OpenGL;
 
 namespace Kestrel.Framework.Client.Graphics.Buffers;
 
-public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
+public class CubeMesh(ClientState clientState) : Mesh(clientState)
 {
-    readonly Chunk chunk = chunk;
-
     public override unsafe void Generate()
     {
         vao = clientState.Window.GL.GenVertexArray();
@@ -16,30 +14,12 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
         clientState.Window.GL.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
 
         Mesher mesher = new();
-        for (int x = 0; x < chunk.World.ChunkSize; x++)
-        {
-            for (int y = 0; y < chunk.World.ChunkSize; y++)
-            {
-                for (int z = 0; z < chunk.World.ChunkSize; z++)
-                {
-                    if (chunk.GetBlock(x, y, z) == BlockType.Air)
-                        continue;
-
-                    if (chunk.GetBlock(x, y + 1, z) == BlockType.Air)
-                        mesher.AddUpFace(x, y, z);
-                    if (chunk.GetBlock(x, y - 1, z) == BlockType.Air)
-                        mesher.AddDownFace(x, y, z);
-                    if (chunk.GetBlock(x + 1, y, z) == BlockType.Air)
-                        mesher.AddEastFace(x, y, z);
-                    if (chunk.GetBlock(x - 1, y, z) == BlockType.Air)
-                        mesher.AddWestFace(x, y, z);
-                    if (chunk.GetBlock(x, y, z + 1) == BlockType.Air)
-                        mesher.AddNorthFace(x, y, z);
-                    if (chunk.GetBlock(x, y, z - 1) == BlockType.Air)
-                        mesher.AddSouthFace(x, y, z);
-                }
-            }
-        }
+        mesher.AddUpFace(0, 0, 0);
+        mesher.AddDownFace(0, 0, 0);
+        mesher.AddEastFace(0, 0, 0);
+        mesher.AddWestFace(0, 0, 0);
+        mesher.AddNorthFace(0, 0, 0);
+        mesher.AddSouthFace(0, 0, 0);
         Vertices = mesher.Vertices.ToArray();
 
         fixed (float* buf = Vertices)

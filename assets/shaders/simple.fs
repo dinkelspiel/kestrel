@@ -12,9 +12,9 @@ float getShade(int dir) {
   case 0:
     return 1.0f;
   case 1:
-  case 2:
-    return 0.8f;
   case 3:
+    return 0.8f;
+  case 2:
   case 4:
     return 0.6f;
   case 5:

@@ -1,15 +1,3 @@
-/home/keii/Coding/voxel/Kestrel.Framework/bin/Debug/net8.0/Kestrel.Framework.deps.json
-/home/keii/Coding/voxel/Kestrel.Framework/bin/Debug/net8.0/Kestrel.Framework.dll
-/home/keii/Coding/voxel/Kestrel.Framework/bin/Debug/net8.0/Kestrel.Framework.pdb
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.csproj.AssemblyReference.cache
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.GeneratedMSBuildEditorConfig.editorconfig
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.AssemblyInfoInputs.cache
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.AssemblyInfo.cs
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.csproj.CoreCompileInputs.cache
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.dll
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/refint/Kestrel.Framework.dll
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.pdb
-/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/ref/Kestrel.Framework.dll
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\bin\Debug\net8.0\Kestrel.Framework.deps.json
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\bin\Debug\net8.0\Kestrel.Framework.dll
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\bin\Debug\net8.0\Kestrel.Framework.pdb
