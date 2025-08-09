@@ -65,7 +65,8 @@ public class Client
             {
                 Name = Environment.GetCommandLineArgs()[1],
                 Location = new(0, 0, 0)
-            }
+            },
+            World = new()
         };
 
         for (int i = 0; i < _input.Keyboards.Count; i++)
@@ -121,7 +122,7 @@ public class Client
     private void OnUpdate(double deltaTime)
     {
         var _keyboard = _input.Keyboards[0];
-        float cameraSpeed = 15.0f * (float)deltaTime;
+        float cameraSpeed = 150.0f * (float)deltaTime;
 
         bool playerMoved = false;
         if (_keyboard.IsKeyPressed(Key.W))

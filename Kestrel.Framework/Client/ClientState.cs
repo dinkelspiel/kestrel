@@ -1,7 +1,9 @@
 using System.Numerics;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics;
+using Kestrel.Framework.Client.Graphics.Buffers;
 using Kestrel.Framework.Server.Player;
+using Kestrel.Framework.World;
 using LiteNetLib;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
@@ -13,6 +15,8 @@ public class ClientState
     public ClientPlayer Player;
     public Dictionary<String, ClientPlayer> Players = [];
     public NetPeer NetServer;
+    public World World;
+    public Dictionary<ChunkPos, ChunkMesh> ChunkMeshes = [];
 
     public ClientState(GL gl, IWindow silkWindow)
     {

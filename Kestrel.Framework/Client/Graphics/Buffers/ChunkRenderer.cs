@@ -14,17 +14,10 @@ public class QuadMesh
     private ShaderProgram _shader;
     private ClientState clientState;
     private static uint _texture;
-    World.World world;
-    ChunkMesh mesh1;
-    ChunkMesh mesh2;
     CubeMesh cube;
 
     public unsafe QuadMesh(ClientState clientState, ShaderProgram shader)
     {
-        world = new();
-        Chunk chunk1 = new(world, 0, 0, 0);
-        Chunk chunk2 = new(world, 1, 0, 0);
-
         this.clientState = clientState;
         this._shader = shader;
 
@@ -48,10 +41,6 @@ public class QuadMesh
         int location = shader.GetUniformLocation("uTexture");
         clientState.Window.GL.Uniform1(location, 0);
 
-        mesh1 = new(clientState, chunk1);
-        mesh1.Generate();
-        mesh2 = new(clientState, chunk2);
-        mesh2.Generate();
         cube = new(clientState);
         cube.Generate();
     }
@@ -62,7 +51,7 @@ public class QuadMesh
         clientState.Window.GL.BindTexture(TextureTarget.Texture2D, _texture);
         _shader.Use();
 
-        mat4 projection = mat4.Perspective(glm.Radians(90.0f), (float)clientState.Window.Width / (float)clientState.Window.Height, 0.1f, 100.0f);
+        mat4 projection = mat4.Perspective(glm.Radians(90.0f), (float)clientState.Window.Width / (float)clientState.Window.Height, 0.1f, 3000.0f);
 
         fixed (float* matrixPtr = clientState.Camera.View.Values1D)
         {
@@ -75,21 +64,18 @@ public class QuadMesh
             clientState.Window.GL.UniformMatrix4(loc, 1, false, matrixPtr);
         }
 
-        mesh1.Bind();
-        vec3 pos = new(0, 0, 0);
-        mat4 model = mat4.Identity * mat4.Translate(pos);
-        fixed (float* ptr = model.Values1D)
-            clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+        foreach (KeyValuePair<ChunkPos, ChunkMesh> mesh in clientState.ChunkMeshes.ToList())
+        {
+            mesh.Value.Bind();
 
-        clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, (uint)mesh1.Vertices.Length / 5);
+            vec3 pos = new(mesh.Key.X * clientState.World.ChunkSize, mesh.Key.Y * clientState.World.ChunkSize, mesh.Key.Z * clientState.World.ChunkSize);
+            mat4 model = mat4.Identity * mat4.Translate(pos);
+            fixed (float* ptr = model.Values1D)
+                clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
 
-        mesh2.Bind();
-        pos = new(32, 0, 0);
-        model = mat4.Identity * mat4.Translate(pos);
-        fixed (float* ptr = model.Values1D)
-            clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+            clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, (uint)mesh.Value.Vertices.Length / 6);
+        }
 
-        clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, (uint)mesh2.Vertices.Length / 5);
         // for (int x = 0; x < world.ChunkSize; x++)
         // {
         //     for (int y = 0; y < world.ChunkSize; y++)
@@ -112,8 +98,8 @@ public class QuadMesh
         cube.Bind();
         foreach (ClientPlayer player in clientState.Players.Values)
         {
-            pos = player.Location;
-            model = mat4.Identity * mat4.Translate(pos);
+            vec3 pos = player.Location;
+            mat4 model = mat4.Identity * mat4.Translate(pos);
             fixed (float* ptr = model.Values1D)
                 clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
 

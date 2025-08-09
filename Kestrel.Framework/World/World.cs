@@ -15,14 +15,35 @@ public sealed class World
 {
     public readonly int ChunkSize = 32;
     private readonly Dictionary<ChunkPos, Chunk> _chunks = new();
+    public Generator Generator = new();
 
-    public bool TryGetChunk(int cx, int cy, int cz, out Chunk chunk) =>
-        _chunks.TryGetValue(new ChunkPos(cx, cy, cz), out chunk);
+    public Chunk GetChunkAndGenerate(int cx, int cy, int cz)
+    {
+        ChunkPos chunkPos = new(cx, cy, cz);
+        if (_chunks.TryGetValue(chunkPos, out var chunk))
+        {
+            return chunk;
+        }
+
+        Chunk newChunk = new(this, cx, cy, cz);
+        newChunk.Generate();
+        _chunks.Add(chunkPos, newChunk);
+        return newChunk;
+    }
+
+
+    public Chunk? GetChunk(int cx, int cy, int cz)
+    {
+        ChunkPos chunkPos = new(cx, cy, cz);
+        if (_chunks.TryGetValue(chunkPos, out var chunk))
+        {
+            return chunk;
+        }
+        return null;
+    }
 
     public void SetChunk(int cx, int cy, int cz, Chunk chunk) =>
         _chunks[new ChunkPos(cx, cy, cz)] = chunk;
-
-    public Generator Generator = new();
 
     public static void WorldToChunk(int wx, int wy, int wz, int chunkSize,
                                    out ChunkPos cpos, out (int lx, int ly, int lz) local)

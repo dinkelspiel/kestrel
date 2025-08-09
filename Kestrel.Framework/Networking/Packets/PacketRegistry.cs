@@ -13,9 +13,11 @@ public static class PacketRegistry
         RegisterS2C(new S2CPlayerLoginSuccess());
         RegisterS2C(new S2CBroadcastPlayerMove());
         RegisterS2C(new S2CBroadcastPlayerJoin());
+        RegisterS2C(new S2CChunkResponse());
 
         RegisterC2S(new C2SPlayerLoginRequest());
         RegisterC2S(new C2SPlayerMove());
+        RegisterC2S(new C2SChunkRequest());
     }
 
     public static void RegisterS2C(IS2CPacket packet)

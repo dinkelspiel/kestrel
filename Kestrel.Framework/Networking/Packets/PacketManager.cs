@@ -47,13 +47,13 @@ public static class PacketManager
 
     public static void HandleC2SPacket(IC2SPacket packet, ServerState context, NetPeer client)
     {
-        Console.WriteLine($"Handling C2S packet with ID: {packet.GetType().Name}");
+        // Console.WriteLine($"Handling C2S packet with ID: {packet.GetType().Name}");
         packet.Handle(context, client);
     }
 
     public static void HandleS2CPacket(IS2CPacket packet, ClientState context, NetPeer server)
     {
-        Console.WriteLine($"Handling S2C packet with ID: {packet.GetType().Name}");
+        // Console.WriteLine($"Handling S2C packet with ID: {packet.GetType().Name}");
         packet.Handle(context, server);
     }
 }

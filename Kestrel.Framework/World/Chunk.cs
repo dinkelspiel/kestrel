@@ -5,20 +5,29 @@ public class Chunk
     public World World;
     public BlockType[] Blocks = [];
     public int ChunkX, ChunkY, ChunkZ;
+    public bool IsEmpty = true;
 
     public Chunk(World world, int cx, int cy, int cz)
     {
-        this.ChunkX = cx;
-        this.ChunkY = cy;
-        this.ChunkZ = cz;
-        this.World = world;
+        ChunkX = cx;
+        ChunkY = cy;
+        ChunkZ = cz;
+        World = world;
         Blocks = new BlockType[world.ChunkSize * world.ChunkSize * world.ChunkSize];
+    }
 
-        for (int i = 0; i < world.ChunkSize * world.ChunkSize * world.ChunkSize; i++)
+    public void Generate()
+    {
+        IsEmpty = true;
+        for (int i = 0; i < World.ChunkSize * World.ChunkSize * World.ChunkSize; i++)
         {
             var (x, y, z) = IndexToChunk(i);
             var (wx, wy, wz) = ChunkToWorld(x, y, z);
-            Blocks[i] = world.Generator.GetBlock(wx, wy, wz);
+            BlockType block = World.Generator.GetBlock(wx, wy, wz);
+            Blocks[i] = block;
+
+            if (block != BlockType.Air)
+                IsEmpty = false;
         }
     }
 

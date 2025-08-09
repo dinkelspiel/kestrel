@@ -17,6 +17,8 @@ public class Server
         ServerState.NetServer = new(listener);
         ServerState.NetServer.Start(9050 /* port */);
 
+        ServerState.World = new();
+
         PacketRegistry.RegisterPackets();
 
         listener.ConnectionRequestEvent += request =>

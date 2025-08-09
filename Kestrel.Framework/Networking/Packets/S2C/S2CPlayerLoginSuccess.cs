@@ -1,6 +1,8 @@
 using System.Numerics;
 using GlmSharp;
+using Kestrel.Framework.Networking.Packets.C2S;
 using Kestrel.Framework.Server.Player;
+using Kestrel.Framework.World;
 using LiteNetLib;
 using LiteNetLib.Utils;
 
@@ -68,6 +70,19 @@ public class S2CPlayerLoginSuccess : IS2CPacket
                 Name = player.Name,
                 Location = player.Location
             });
+        }
+
+        for (int x = 0; x < 16; x++)
+        {
+            for (int z = 0; z < 16; z++)
+            {
+                server.Send(PacketManager.SerializeC2SPacket(new C2SChunkRequest()
+                {
+                    ChunkX = x,
+                    ChunkY = 0,
+                    ChunkZ = z
+                }), DeliveryMethod.ReliableOrdered);
+            }
         }
     }
 }
