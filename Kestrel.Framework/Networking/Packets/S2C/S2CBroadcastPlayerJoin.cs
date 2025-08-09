@@ -43,13 +43,13 @@ public class S2CBroadcastPlayerJoin : IS2CPacket
             context.Players.Add(PlayerName, new ClientPlayer()
             {
                 Name = PlayerName,
-                Location = new vec3(Position.X, Position.Y, Position.Z)
+                Location = new Vector3(Position.X, Position.Y, Position.Z)
             });
         }
         else
         {
             ClientPlayer player = context.Players[PlayerName];
-            player.Location = new vec3(Position.X, Position.Y, Position.Z);
+            player.Location = new Vector3(Position.X, Position.Y, Position.Z);
         }
     }
 }

@@ -2,6 +2,7 @@ namespace Kestrel.Framework.Client.Graphics;
 
 using System.Numerics;
 using GlmSharp;
+using Kestrel.Framework.Utils;
 using Silk.NET.Input;
 using Silk.NET.Vulkan;
 
@@ -28,7 +29,7 @@ public class Camera
     {
         get
         {
-            return mat4.LookAt(clientState.Player.Location, clientState.Player.Location + front, up);
+            return mat4.LookAt(clientState.Player.Location.ToVec3(), clientState.Player.Location.ToVec3() + front, up);
         }
     }
 

@@ -2,6 +2,7 @@ using System.Numerics;
 using GlmSharp;
 using Kestrel.Framework.Networking.Packets.C2S;
 using Kestrel.Framework.Server.Player;
+using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -25,11 +26,11 @@ public class S2CPlayerLoginSuccess : IS2CPacket
         for (int i = 0; i < PlayerCount; i++)
         {
             string playerName = reader.GetString(64);
-            vec3 location = new()
+            Vector3 location = new()
             {
-                x = reader.GetFloat(),
-                y = reader.GetFloat(),
-                z = reader.GetFloat()
+                X = reader.GetFloat(),
+                Y = reader.GetFloat(),
+                Z = reader.GetFloat()
             };
 
             Players.Add(new ClientPlayer
@@ -49,15 +50,19 @@ public class S2CPlayerLoginSuccess : IS2CPacket
         foreach (var player in Players)
         {
             writer.Put(player.Name, 64);
-            writer.Put(player.Location.x);
-            writer.Put(player.Location.y);
-            writer.Put(player.Location.z);
+            writer.Put(player.Location.X);
+            writer.Put(player.Location.Y);
+            writer.Put(player.Location.Z);
         }
     }
 
     public void Handle(ClientState context, NetPeer server)
     {
-        context.Player.Location = new vec3(Position.X, Position.X, Position.Y);
+        context.Player.Location = new Vector3(Position.X, Position.Y, Position.Z);
+
+        context.World.WorldToChunk((int)Position.X, (int)Position.Y, (int)Position.Z, out var chunkPos, out _);
+        context.Player.LastFrameChunkPos = chunkPos;
+
         foreach (var player in Players)
         {
             if (player.Name == context.Player.Name)
@@ -72,17 +77,9 @@ public class S2CPlayerLoginSuccess : IS2CPacket
             });
         }
 
-        for (int x = 0; x < 16; x++)
+        foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(context.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
         {
-            for (int z = 0; z < 16; z++)
-            {
-                server.Send(PacketManager.SerializeC2SPacket(new C2SChunkRequest()
-                {
-                    ChunkX = x,
-                    ChunkY = 0,
-                    ChunkZ = z
-                }), DeliveryMethod.ReliableOrdered);
-            }
+            context.RequestChunk(new(x, y, z));
         }
     }
 }

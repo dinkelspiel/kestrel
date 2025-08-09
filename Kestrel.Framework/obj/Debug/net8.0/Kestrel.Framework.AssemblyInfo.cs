@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Kestrel.Framework")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+881f8d8db18794bb431b623838a182f14d54972b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+19a481512fb6d320df8c0566a41a70481a85b3b1")]
 [assembly: System.Reflection.AssemblyProductAttribute("Kestrel.Framework")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Kestrel.Framework")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

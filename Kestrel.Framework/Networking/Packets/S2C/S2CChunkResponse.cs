@@ -2,6 +2,7 @@ using System.Numerics;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics.Buffers;
 using Kestrel.Framework.Server.Player;
+using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -65,21 +66,21 @@ public class S2CChunkResponse : IS2CPacket
 
     public void Handle(ClientState context, NetPeer server)
     {
-        var chunk = new Chunk(context.World, ChunkX, ChunkY, ChunkZ) { Blocks = Blocks };
+        var chunk = new Chunk(context.World, ChunkX, ChunkY, ChunkZ) { Blocks = Blocks, IsEmpty = IsEmpty };
         context.World.SetChunk(ChunkX, ChunkY, ChunkZ, chunk);
 
-        var key = new ChunkPos(ChunkX, ChunkY, ChunkZ);
+        var key = new Vector3I(ChunkX, ChunkY, ChunkZ);
         context.ChunkMeshes.Remove(key);
 
         var mesh = new ChunkMesh(context, chunk);
         mesh.Generate();
         context.ChunkMeshes.Add(key, mesh);
 
-        if (context.ChunkMeshes.TryGetValue(new ChunkPos(ChunkX, ChunkY + 1, ChunkZ), out var topMesh)) topMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new ChunkPos(ChunkX, ChunkY - 1, ChunkZ), out var bottomMesh)) bottomMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new ChunkPos(ChunkX, ChunkY, ChunkZ + 1), out var northMesh)) northMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new ChunkPos(ChunkX, ChunkY, ChunkZ - 1), out var southMesh)) southMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new ChunkPos(ChunkX - 1, ChunkY, ChunkZ), out var westMesh)) westMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new ChunkPos(ChunkX + 1, ChunkY, ChunkZ), out var eastMesh)) eastMesh.Generate();
+        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY + 1, ChunkZ), out var topMesh)) topMesh.Generate();
+        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY - 1, ChunkZ), out var bottomMesh)) bottomMesh.Generate();
+        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY, ChunkZ + 1), out var northMesh)) northMesh.Generate();
+        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY, ChunkZ - 1), out var southMesh)) southMesh.Generate();
+        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX - 1, ChunkY, ChunkZ), out var westMesh)) westMesh.Generate();
+        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX + 1, ChunkY, ChunkZ), out var eastMesh)) eastMesh.Generate();
     }
 }

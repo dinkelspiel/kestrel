@@ -30,8 +30,8 @@ public struct C2SChunkRequest : IC2SPacket
 
     public void Handle(ServerState context, NetPeer client)
     {
-        Chunk chunk = context.World.GetChunkAndGenerate(ChunkX, ChunkY, ChunkZ);
+        Chunk chunk = context.World.GetChunkOrGenerate(ChunkX, ChunkY, ChunkZ);
 
-        client.Send(PacketManager.SerializeS2CPacket(new S2CChunkResponse(chunk)), DeliveryMethod.ReliableOrdered);
+        client.Send(PacketManager.SerializeS2CPacket(new S2CChunkResponse(chunk)), DeliveryMethod.ReliableUnordered);
     }
 }

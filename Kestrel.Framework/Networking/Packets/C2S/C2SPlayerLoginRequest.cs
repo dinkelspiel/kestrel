@@ -33,10 +33,11 @@ public struct C2SPlayerLoginRequest(String playerName) : IC2SPacket
     {
         if (!context.PlayersByName.ContainsKey(PlayerName))
         {
+            vec3 location = new(0, 120, 0);
             ServerPlayer serverPlayer = new ServerPlayer()
             {
                 Name = PlayerName,
-                Location = new(0, 0, 0),
+                Location = location,
                 NetClient = client
             };
 
@@ -45,19 +46,19 @@ public struct C2SPlayerLoginRequest(String playerName) : IC2SPacket
 
             client.Send(PacketManager.SerializeS2CPacket(new S2CPlayerLoginSuccess()
             {
-                Position = new(0, 0, 0),
+                Position = new(location.x, location.y, location.z),
                 PlayerCount = context.PlayersByName.Count,
                 Players = context.PlayersByName.Values.Select(p => new ClientPlayer
                 {
                     Name = p.Name,
-                    Location = new vec3(p.Location.x, p.Location.y, p.Location.z)
+                    Location = new Vector3(p.Location.x, p.Location.y, p.Location.z)
                 }).ToList()
             }), DeliveryMethod.ReliableOrdered);
 
             context.NetServer.SendToAll(PacketManager.SerializeS2CPacket(new S2CBroadcastPlayerJoin()
             {
                 PlayerName = PlayerName,
-                Position = new(0, 0, 0)
+                Position = new(location.x, location.y, location.z)
             }), DeliveryMethod.ReliableOrdered);
 
             Console.WriteLine($"Player {PlayerName} logged in successfully.");
@@ -76,7 +77,7 @@ public struct C2SPlayerLoginRequest(String playerName) : IC2SPacket
                 Players = context.PlayersByName.Values.Select(p => new ClientPlayer
                 {
                     Name = p.Name,
-                    Location = new vec3(p.Location.x, p.Location.y, p.Location.z)
+                    Location = new Vector3(p.Location.x, p.Location.y, p.Location.z)
                 }).ToList()
             }), DeliveryMethod.ReliableOrdered);
 

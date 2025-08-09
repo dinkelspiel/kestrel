@@ -25,7 +25,7 @@ public class QuadMesh
         clientState.Window.GL.ActiveTexture(TextureUnit.Texture0);
         clientState.Window.GL.BindTexture(TextureTarget.Texture2D, _texture);
 
-        ImageResult result = ImageResult.FromMemory(File.ReadAllBytes(Paths.InAssets("textures/wall.jpg")), ColorComponents.RedGreenBlueAlpha);
+        ImageResult result = ImageResult.FromMemory(File.ReadAllBytes(Paths.InAssets("textures/atlas.png")), ColorComponents.RedGreenBlueAlpha);
 
         fixed (byte* ptr = result.Data)
             clientState.Window.GL.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)result.Width,
@@ -64,7 +64,7 @@ public class QuadMesh
             clientState.Window.GL.UniformMatrix4(loc, 1, false, matrixPtr);
         }
 
-        foreach (KeyValuePair<ChunkPos, ChunkMesh> mesh in clientState.ChunkMeshes.ToList())
+        foreach (KeyValuePair<Vector3I, ChunkMesh> mesh in clientState.ChunkMeshes.ToList())
         {
             mesh.Value.Bind();
 
@@ -98,7 +98,7 @@ public class QuadMesh
         cube.Bind();
         foreach (ClientPlayer player in clientState.Players.Values)
         {
-            vec3 pos = player.Location;
+            vec3 pos = player.Location.ToVec3();
             mat4 model = mat4.Identity * mat4.Translate(pos);
             fixed (float* ptr = model.Values1D)
                 clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);

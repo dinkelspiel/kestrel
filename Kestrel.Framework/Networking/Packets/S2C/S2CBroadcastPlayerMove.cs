@@ -39,6 +39,6 @@ public class S2CBroadcastPlayerMove : IS2CPacket
         }
 
         ClientPlayer player = context.Players[PlayerName];
-        player.Location = new vec3(Position.X, Position.Y, Position.Z);
+        player.Location = new Vector3(Position.X, Position.Y, Position.Z);
     }
 }
