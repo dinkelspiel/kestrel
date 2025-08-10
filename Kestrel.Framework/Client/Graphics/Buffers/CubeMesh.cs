@@ -14,12 +14,12 @@ public class CubeMesh(ClientState clientState) : Mesh(clientState)
         clientState.Window.GL.BindBuffer(BufferTargetARB.ArrayBuffer, vbo);
 
         Mesher mesher = new();
-        mesher.AddUpFace(0, 0, 0);
-        mesher.AddDownFace(0, 0, 0);
-        mesher.AddEastFace(0, 0, 0);
-        mesher.AddWestFace(0, 0, 0);
-        mesher.AddNorthFace(0, 0, 0);
-        mesher.AddSouthFace(0, 0, 0);
+        mesher.AddUpFace(BlockType.Stone, 0, 0, 0);
+        mesher.AddDownFace(BlockType.Stone, 0, 0, 0);
+        mesher.AddEastFace(BlockType.Stone, 0, 0, 0);
+        mesher.AddWestFace(BlockType.Stone, 0, 0, 0);
+        mesher.AddNorthFace(BlockType.Stone, 0, 0, 0);
+        mesher.AddSouthFace(BlockType.Stone, 0, 0, 0);
         Vertices = mesher.Vertices.ToArray();
 
         fixed (float* buf = Vertices)

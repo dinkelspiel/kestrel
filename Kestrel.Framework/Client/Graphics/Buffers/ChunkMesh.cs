@@ -31,7 +31,12 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
                 {
                     for (int z = 0; z < chunk.World.ChunkSize; z++)
                     {
-                        if (chunk.GetBlock(x, y, z) == BlockType.Air)
+                        float wx = chunk.ChunkX * chunk.World.ChunkSize + x;
+                        float wy = chunk.ChunkY * chunk.World.ChunkSize + y;
+                        float wz = chunk.ChunkZ * chunk.World.ChunkSize + z;
+
+                        BlockType? block = chunk.GetBlock(x, y, z);
+                        if (block == BlockType.Air || block == null)
                             continue;
 
                         if (y + 1 >= chunk.World.ChunkSize)
@@ -39,16 +44,16 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
                             if (topChunk != null)
                             {
                                 if (topChunk.GetBlock(x, 0, z) == BlockType.Air)
-                                    mesher.AddUpFace(x, y, z);
+                                    mesher.AddUpFace(block.Value, x, y, z);
                             }
                             else
                             {
-                                mesher.AddUpFace(x, y, z);
+                                // mesher.AddUpFace(block.Value, x, y, z);
                             }
                         }
                         else if (chunk.GetBlock(x, y + 1, z) == BlockType.Air)
                         {
-                            mesher.AddUpFace(x, y, z);
+                            mesher.AddUpFace(block.Value, x, y, z);
                         }
 
                         if (y - 1 < 0)
@@ -56,16 +61,16 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
                             if (bottomChunk != null)
                             {
                                 if (bottomChunk.GetBlock(x, chunk.World.ChunkSize - 1, z) == BlockType.Air)
-                                    mesher.AddDownFace(x, y, z);
+                                    mesher.AddDownFace(block.Value, x, y, z);
                             }
                             else
                             {
-                                mesher.AddDownFace(x, y, z);
+                                // mesher.AddDownFace(block.Value, x, y, z);
                             }
                         }
                         else if (chunk.GetBlock(x, y - 1, z) == BlockType.Air)
                         {
-                            mesher.AddDownFace(x, y, z);
+                            mesher.AddDownFace(block.Value, x, y, z);
                         }
 
                         if (x + 1 >= chunk.World.ChunkSize)
@@ -73,16 +78,16 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
                             if (eastChunk != null)
                             {
                                 if (eastChunk.GetBlock(0, y, z) == BlockType.Air)
-                                    mesher.AddEastFace(x, y, z);
+                                    mesher.AddEastFace(block.Value, x, y, z);
                             }
                             else
                             {
-                                mesher.AddEastFace(x, y, z);
+                                // mesher.AddEastFace(block.Value, x, y, z);
                             }
                         }
                         else if (chunk.GetBlock(x + 1, y, z) == BlockType.Air)
                         {
-                            mesher.AddEastFace(x, y, z);
+                            mesher.AddEastFace(block.Value, x, y, z);
                         }
 
                         if (x - 1 < 0)
@@ -90,16 +95,16 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
                             if (westChunk != null)
                             {
                                 if (westChunk.GetBlock(chunk.World.ChunkSize - 1, y, z) == BlockType.Air)
-                                    mesher.AddWestFace(x, y, z);
+                                    mesher.AddWestFace(block.Value, x, y, z);
                             }
                             else
                             {
-                                mesher.AddWestFace(x, y, z);
+                                // mesher.AddWestFace(block.Value, x, y, z);
                             }
                         }
                         else if (chunk.GetBlock(x - 1, y, z) == BlockType.Air)
                         {
-                            mesher.AddWestFace(x, y, z);
+                            mesher.AddWestFace(block.Value, x, y, z);
                         }
 
                         if (z + 1 >= chunk.World.ChunkSize)
@@ -107,16 +112,16 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
                             if (northChunk != null)
                             {
                                 if (northChunk.GetBlock(x, y, 0) == BlockType.Air)
-                                    mesher.AddNorthFace(x, y, z);
+                                    mesher.AddNorthFace(block.Value, x, y, z);
                             }
                             else
                             {
-                                mesher.AddNorthFace(x, y, z);
+                                // mesher.AddNorthFace(block.Value, x, y, z);
                             }
                         }
                         else if (chunk.GetBlock(x, y, z + 1) == BlockType.Air)
                         {
-                            mesher.AddNorthFace(x, y, z);
+                            mesher.AddNorthFace(block.Value, x, y, z);
                         }
 
                         if (z - 1 < 0)
@@ -124,16 +129,16 @@ public class ChunkMesh(ClientState clientState, Chunk chunk) : Mesh(clientState)
                             if (southChunk != null)
                             {
                                 if (southChunk.GetBlock(x, y, chunk.World.ChunkSize - 1) == BlockType.Air)
-                                    mesher.AddSouthFace(x, y, z);
+                                    mesher.AddSouthFace(block.Value, x, y, z);
                             }
                             else
                             {
-                                mesher.AddSouthFace(x, y, z);
+                                // mesher.AddSouthFace(block.Value, x, y, z);
                             }
                         }
                         else if (chunk.GetBlock(x, y, z - 1) == BlockType.Air)
                         {
-                            mesher.AddSouthFace(x, y, z);
+                            mesher.AddSouthFace(block.Value, x, y, z);
                         }
                     }
                 }

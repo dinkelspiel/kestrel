@@ -1,3 +1,4 @@
+using System.Numerics;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics.Shaders;
 using Kestrel.Framework.Server.Player;
@@ -51,6 +52,29 @@ public class QuadMesh
         clientState.Window.GL.BindTexture(TextureTarget.Texture2D, _texture);
         _shader.Use();
 
+        float nearPlane = 0.1f;
+        float farPlane = 3000.0f;
+
+        var fogColor = new Vector3(105.0f / 255.0f, 196.0f / 255.0f, 224.0f / 255.0f);
+        float fogDensity = 0.0050f;
+
+        int locFogColor = _shader.GetUniformLocation("uFogColor");
+        int locFogDensity = _shader.GetUniformLocation("uFogDensity");
+        int locNear = _shader.GetUniformLocation("uNear");
+        int locFar = _shader.GetUniformLocation("uFar");
+
+        clientState.Window.GL.Uniform3(locFogColor, fogColor.X, fogColor.Y, fogColor.Z);
+        clientState.Window.GL.Uniform1(locFogDensity, fogDensity);
+        clientState.Window.GL.Uniform1(locNear, nearPlane);
+        clientState.Window.GL.Uniform1(locFar, farPlane);
+
+        DrawWorldAndEntities();
+
+        clientState.Window.GL.BindVertexArray(0);
+    }
+
+    public unsafe void DrawWorldAndEntities()
+    {
         mat4 projection = mat4.Perspective(glm.Radians(90.0f), (float)clientState.Window.Width / (float)clientState.Window.Height, 0.1f, 3000.0f);
 
         fixed (float* matrixPtr = clientState.Camera.View.Values1D)
@@ -76,25 +100,6 @@ public class QuadMesh
             clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, (uint)mesh.Value.Vertices.Length / 6);
         }
 
-        // for (int x = 0; x < world.ChunkSize; x++)
-        // {
-        //     for (int y = 0; y < world.ChunkSize; y++)
-        //     {
-        //         for (int z = 0; z < world.ChunkSize; z++)
-        //         {
-        //             if (chunk.GetBlock(x, y, z) == BlockType.Air)
-        //                 continue;
-
-        //             vec3 pos = new(x, y, z);
-        //             mat4 model = mat4.Identity * mat4.Translate(pos);
-        //             fixed (float* ptr = model.Values1D)
-        //                 clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
-
-        //             clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-        //         }
-        //     }
-        // }
-
         cube.Bind();
         foreach (ClientPlayer player in clientState.Players.Values)
         {
@@ -106,7 +111,13 @@ public class QuadMesh
             clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
         }
 
-        clientState.Window.GL.BindVertexArray(0);
-        // clientState.Window.GL.DrawElements(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedInt, (void*)0);
+        {
+            vec3 pos = clientState.Player.Location.ToVec3();
+            mat4 model = mat4.Identity * mat4.Translate(pos);
+            fixed (float* ptr = model.Values1D)
+                clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+
+            clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+        }
     }
 }

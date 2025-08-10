@@ -52,7 +52,7 @@ public class Client
             _input.Keyboards[i].KeyDown += KeyDown;
 
         _gl = _window.CreateOpenGL();
-        _gl.ClearColor(Color.CornflowerBlue);
+        _gl.ClearColor(Color.FromArgb(105, 196, 224));
         _gl.Viewport(0, 0, (uint)_window.Size.X, (uint)_window.Size.Y);
 
         if (Environment.GetCommandLineArgs().Length != 2)
@@ -155,6 +155,29 @@ public class Client
 
         if (playerMoved && clientState.NetServer != null && hasMovedBetweenChunks)
         {
+            List<Vector3I> _requestedChunksCache = [.. clientState.RequestedChunksQueue];
+            foreach (var targetChunk in _requestedChunksCache)
+            {
+                bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.ToVector3()) > clientState.RenderDistance * 1.5;
+                if (condition)
+                {
+                    clientState.RequestedChunks.Remove(targetChunk);
+                    clientState.RequestedChunksQueue.Remove(targetChunk);
+                }
+            }
+
+
+            // List<KeyValuePair<Vector3I, ChunkMesh>> _chunkMeshes = clientState.ChunkMeshes.ToList();
+            // foreach (var targetChunk in _chunkMeshes)
+            // {
+            //     bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.Key.ToVector3()) > clientState.RenderDistance * 1.5;
+            //     if (condition)
+            //     {
+            //         clientState.ChunkMeshes.Remove(targetChunk.Key);
+            //     }
+            // }
+
+
             clientState.Player.LastFrameChunkPos = chunkPos;
 
             foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(clientState.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
@@ -167,7 +190,7 @@ public class Client
 
 
         TimeSpan elapsed = DateTime.Now - lastRequestedChunks;
-        if (elapsed.TotalMilliseconds > 500)
+        if (elapsed.TotalMilliseconds > 300)
         {
             lastRequestedChunks = DateTime.Now;
             clientState.RequestChunksFromQueue();

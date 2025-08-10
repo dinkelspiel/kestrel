@@ -76,4 +76,13 @@ public static class LocationUtil
 
         return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
     }
+
+    public static float HorizontallyWeightedDistance(Vector3 a, Vector3 b)
+    {
+        float dx = a.X - b.X;
+        float dy = a.Y - b.Y;
+        float dz = a.Z - b.Z;
+
+        return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
+    }
 }

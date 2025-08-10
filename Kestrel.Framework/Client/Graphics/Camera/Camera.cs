@@ -1,4 +1,4 @@
-namespace Kestrel.Framework.Client.Graphics;
+namespace Kestrel.Framework.Client.Graphics.Camera;
 
 using System.Numerics;
 using GlmSharp;
@@ -6,7 +6,7 @@ using Kestrel.Framework.Utils;
 using Silk.NET.Input;
 using Silk.NET.Vulkan;
 
-public class Camera
+public abstract class Camera
 {
     ClientState clientState;
     public vec3 front = new(0.0f, 0.0f, -1.0f);

@@ -1,8 +1,19 @@
+using Kestrel.Framework.World;
+
 namespace Kestrel.Framework.Client.Graphics.Buffers;
 
 public class Mesher
 {
     public List<float> Vertices = [];
+
+    public (int x, int y) GetUVCoordsForBlock(BlockType block) => block switch
+    {
+        BlockType.Air => throw new Exception("Can't get texture for air"),
+        BlockType.Stone => (0, 0),
+        BlockType.Dirt => (1, 0),
+        BlockType.Grass => (2, 0),
+        _ => throw new NotImplementedException(),
+    };
 
     const int ATLAS_SIZE = 512;
     const int TILE_SIZE = 16;
@@ -21,9 +32,11 @@ public class Mesher
         return (u0, v0, u1, v1);
     }
 
-    public void AddUpFace(float x, float y, float z)
+    public void AddUpFace(BlockType block, float x, float y, float z)
     {
-        var (u0, v0, u1, v1) = GetUVRect(0, 0);
+        // Get texture
+        var (ux, uy) = GetUVCoordsForBlock(block);
+        var (u0, v0, u1, v1) = GetUVRect(ux, uy);
 
         Vertices.AddRange([
             -0.5f + x,  0.5f + y, -0.5f + z, u0, v1, (float)Direction.UP,
@@ -35,9 +48,10 @@ public class Mesher
         ]);
     }
 
-    public void AddDownFace(float x, float y, float z)
+    public void AddDownFace(BlockType block, float x, float y, float z)
     {
-        var (u0, v0, u1, v1) = GetUVRect(0, 0);
+        var (ux, uy) = GetUVCoordsForBlock(block);
+        var (u0, v0, u1, v1) = GetUVRect(ux, uy);
 
         Vertices.AddRange([
             -0.5f + x, -0.5f + y, -0.5f + z, u0, v1, (float)Direction.DOWN,
@@ -49,9 +63,10 @@ public class Mesher
         ]);
     }
 
-    public void AddEastFace(float x, float y, float z)
+    public void AddEastFace(BlockType block, float x, float y, float z)
     {
-        var (u0, v0, u1, v1) = GetUVRect(0, 0);
+        var (ux, uy) = GetUVCoordsForBlock(block);
+        var (u0, v0, u1, v1) = GetUVRect(ux, uy);
 
         Vertices.AddRange([
             0.5f + x,  0.5f + y,  0.5f + z, u0, v1, (float)Direction.EAST,
@@ -63,9 +78,10 @@ public class Mesher
         ]);
     }
 
-    public void AddWestFace(float x, float y, float z)
+    public void AddWestFace(BlockType block, float x, float y, float z)
     {
-        var (u0, v0, u1, v1) = GetUVRect(0, 0);
+        var (ux, uy) = GetUVCoordsForBlock(block);
+        var (u0, v0, u1, v1) = GetUVRect(ux, uy);
 
         Vertices.AddRange([
             -0.5f + x,  0.5f + y,  0.5f + z, u0, v1, (float)Direction.WEST,
@@ -77,9 +93,10 @@ public class Mesher
         ]);
     }
 
-    public void AddSouthFace(float x, float y, float z)
+    public void AddSouthFace(BlockType block, float x, float y, float z)
     {
-        var (u0, v0, u1, v1) = GetUVRect(0, 0);
+        var (ux, uy) = GetUVCoordsForBlock(block);
+        var (u0, v0, u1, v1) = GetUVRect(ux, uy);
 
         Vertices.AddRange([
             -0.5f + x, -0.5f + y, -0.5f + z, u0, v1, (float)Direction.SOUTH,
@@ -91,9 +108,10 @@ public class Mesher
         ]);
     }
 
-    public void AddNorthFace(float x, float y, float z)
+    public void AddNorthFace(BlockType block, float x, float y, float z)
     {
-        var (u0, v0, u1, v1) = GetUVRect(0, 0);
+        var (ux, uy) = GetUVCoordsForBlock(block);
+        var (u0, v0, u1, v1) = GetUVRect(ux, uy);
 
         Vertices.AddRange([
             -0.5f + x, -0.5f + y,  0.5f + z, u0, v1, (float)Direction.NORTH,
