@@ -58,15 +58,16 @@ public class ClientState
         });
 
 
-        foreach (var chunkPos in queueSortedByDistance.Take(4))
+        int batchCount = 8;
+        NetServer.Send(PacketManager.SerializeC2SPacket(new C2SChunkRequest
+        {
+            ChunkCount = batchCount,
+            Chunks = [.. queueSortedByDistance.Take(batchCount)]
+        }), DeliveryMethod.ReliableOrdered);
+
+        foreach (var chunkPos in queueSortedByDistance.Take(batchCount))
         {
             RequestedChunksQueue.Remove(chunkPos);
-            NetServer.Send(PacketManager.SerializeC2SPacket(new C2SChunkRequest
-            {
-                ChunkX = chunkPos.X,
-                ChunkY = chunkPos.Y,
-                ChunkZ = chunkPos.Z
-            }), DeliveryMethod.ReliableOrdered);
         }
     }
 }

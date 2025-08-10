@@ -9,78 +9,113 @@ using LiteNetLib.Utils;
 
 namespace Kestrel.Framework.Networking.Packets.S2C;
 
-public class S2CChunkResponse : IS2CPacket
+public class PacketChunk
 {
-    public ushort PacketId => 6;
     public bool IsEmpty;
     public int ChunkX, ChunkY, ChunkZ;
     public int BlockCount;
     public BlockType[] Blocks;
+}
+
+public class S2CChunkResponse : IS2CPacket
+{
+    public ushort PacketId => 6;
+
+    public int ChunkCount;
+    public PacketChunk[] Chunks;
 
     public S2CChunkResponse()
     {
     }
 
-    public S2CChunkResponse(Chunk chunk)
+    public S2CChunkResponse(Chunk[] chunks)
     {
-        ChunkX = chunk.ChunkX;
-        ChunkY = chunk.ChunkY;
-        ChunkZ = chunk.ChunkZ;
-        IsEmpty = chunk.IsEmpty;
-        BlockCount = chunk.Blocks.Length;
-        Blocks = chunk.Blocks;
+        int index = -1;
+        Chunks = new PacketChunk[chunks.Length];
+        ChunkCount = chunks.Length;
+        foreach (var chunk in chunks)
+        {
+            index++;
+            PacketChunk packetChunk = new()
+            {
+                ChunkX = chunk.ChunkX,
+                ChunkY = chunk.ChunkY,
+                ChunkZ = chunk.ChunkZ,
+                IsEmpty = chunk.IsEmpty,
+                BlockCount = chunk.Blocks.Length,
+                Blocks = chunk.Blocks,
+            };
+            Chunks[index] = packetChunk;
+        }
     }
 
     public void Deserialize(NetDataReader reader)
     {
-        IsEmpty = reader.GetBool();
-        ChunkX = reader.GetInt();
-        ChunkY = reader.GetInt();
-        ChunkZ = reader.GetInt();
-        BlockCount = reader.GetInt();
-        Blocks = new BlockType[BlockCount];
-        if (!IsEmpty)
+        ChunkCount = reader.GetInt();
+        Chunks = new PacketChunk[ChunkCount];
+        for (int i = 0; i < ChunkCount; i++)
         {
-            for (int i = 0; i < BlockCount; i++)
+            PacketChunk packetChunk = new()
             {
-                Blocks[i] = (BlockType)reader.GetInt();
+                IsEmpty = reader.GetBool(),
+                ChunkX = reader.GetInt(),
+                ChunkY = reader.GetInt(),
+                ChunkZ = reader.GetInt(),
+                BlockCount = reader.GetInt()
+            };
+            packetChunk.Blocks = new BlockType[packetChunk.BlockCount];
+            if (!packetChunk.IsEmpty)
+            {
+                for (int j = 0; j < packetChunk.BlockCount; j++)
+                {
+                    packetChunk.Blocks[j] = (BlockType)reader.GetInt();
+                }
             }
+            Chunks[i] = packetChunk;
         }
     }
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put(IsEmpty);
-        writer.Put(ChunkX);
-        writer.Put(ChunkY);
-        writer.Put(ChunkZ);
-        writer.Put(BlockCount);
-        if (!IsEmpty)
+        writer.Put(ChunkCount);
+        for (int i = 0; i < ChunkCount; i++)
         {
-            foreach (var block in Blocks)
+            PacketChunk chunk = Chunks[i];
+            writer.Put(chunk.IsEmpty);
+            writer.Put(chunk.ChunkX);
+            writer.Put(chunk.ChunkY);
+            writer.Put(chunk.ChunkZ);
+            writer.Put(chunk.BlockCount);
+            if (!chunk.IsEmpty)
             {
-                writer.Put((int)block);
+                foreach (var block in chunk.Blocks)
+                {
+                    writer.Put((int)block);
+                }
             }
         }
     }
 
     public void Handle(ClientState context, NetPeer server)
     {
-        var chunk = new Chunk(context.World, ChunkX, ChunkY, ChunkZ) { Blocks = Blocks, IsEmpty = IsEmpty };
-        context.World.SetChunk(ChunkX, ChunkY, ChunkZ, chunk);
+        foreach (var packetChunk in Chunks)
+        {
+            var chunk = new Chunk(context.World, packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ) { Blocks = packetChunk.Blocks, IsEmpty = packetChunk.IsEmpty };
+            context.World.SetChunk(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ, chunk);
 
-        var key = new Vector3I(ChunkX, ChunkY, ChunkZ);
-        context.ChunkMeshes.Remove(key);
+            var key = new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ);
+            context.ChunkMeshes.Remove(key);
 
-        var mesh = new ChunkMesh(context, chunk);
-        mesh.Generate();
-        context.ChunkMeshes.Add(key, mesh);
+            var mesh = new ChunkMesh(context, chunk);
+            mesh.Generate();
+            context.ChunkMeshes.Add(key, mesh);
 
-        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY + 1, ChunkZ), out var topMesh)) topMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY - 1, ChunkZ), out var bottomMesh)) bottomMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY, ChunkZ + 1), out var northMesh)) northMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX, ChunkY, ChunkZ - 1), out var southMesh)) southMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX - 1, ChunkY, ChunkZ), out var westMesh)) westMesh.Generate();
-        if (context.ChunkMeshes.TryGetValue(new Vector3I(ChunkX + 1, ChunkY, ChunkZ), out var eastMesh)) eastMesh.Generate();
+            if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY + 1, packetChunk.ChunkZ), out var topMesh)) topMesh.Generate();
+            if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY - 1, packetChunk.ChunkZ), out var bottomMesh)) bottomMesh.Generate();
+            if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ + 1), out var northMesh)) northMesh.Generate();
+            if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ - 1), out var southMesh)) southMesh.Generate();
+            if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX - 1, packetChunk.ChunkY, packetChunk.ChunkZ), out var westMesh)) westMesh.Generate();
+            if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX + 1, packetChunk.ChunkY, packetChunk.ChunkZ), out var eastMesh)) eastMesh.Generate();
+        }
     }
 }

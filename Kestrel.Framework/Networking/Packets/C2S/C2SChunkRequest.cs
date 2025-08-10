@@ -3,6 +3,7 @@ using System.Text;
 using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Server;
 using Kestrel.Framework.Server.Player;
+using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -12,26 +13,41 @@ namespace Kestrel.Framework.Networking.Packets.C2S;
 public struct C2SChunkRequest : IC2SPacket
 {
     public ushort PacketId => 6;
-    public int ChunkX, ChunkY, ChunkZ;
+    public int ChunkCount;
+    public Vector3I[] Chunks;
 
     public void Deserialize(NetDataReader reader)
     {
-        ChunkX = reader.GetInt();
-        ChunkY = reader.GetInt();
-        ChunkZ = reader.GetInt();
+        ChunkCount = reader.GetInt();
+        Chunks = new Vector3I[ChunkCount];
+        for (int i = 0; i < ChunkCount; i++)
+        {
+            Chunks[i] = new(reader.GetInt(), reader.GetInt(), reader.GetInt());
+        }
     }
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put(ChunkX);
-        writer.Put(ChunkY);
-        writer.Put(ChunkZ);
+        writer.Put(ChunkCount);
+        for (int i = 0; i < ChunkCount; i++)
+        {
+            writer.Put(Chunks[i].X);
+            writer.Put(Chunks[i].Y);
+            writer.Put(Chunks[i].Z);
+        }
     }
 
     public void Handle(ServerState context, NetPeer client)
     {
-        Chunk chunk = context.World.GetChunkOrGenerate(ChunkX, ChunkY, ChunkZ);
+        Chunk[] generatedChunks = new Chunk[ChunkCount];
+        int index = -1;
+        foreach (var chunkPos in Chunks)
+        {
+            index++;
+            Chunk chunk = context.World.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z);
 
-        client.Send(PacketManager.SerializeS2CPacket(new S2CChunkResponse(chunk)), DeliveryMethod.ReliableUnordered);
+            generatedChunks[index] = chunk;
+        }
+        client.Send(PacketManager.SerializeS2CPacket(new S2CChunkResponse(generatedChunks)), DeliveryMethod.ReliableUnordered);
     }
 }

@@ -190,7 +190,7 @@ public class Client
 
 
         TimeSpan elapsed = DateTime.Now - lastRequestedChunks;
-        if (elapsed.TotalMilliseconds > 300)
+        if (elapsed.TotalMilliseconds > 500)
         {
             lastRequestedChunks = DateTime.Now;
             clientState.RequestChunksFromQueue();
