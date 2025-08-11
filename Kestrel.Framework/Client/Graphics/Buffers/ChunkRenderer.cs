@@ -55,7 +55,7 @@ public class QuadMesh
         float nearPlane = 0.1f;
         float farPlane = 3000.0f;
 
-        var fogColor = new Vector3(105.0f / 255.0f, 196.0f / 255.0f, 224.0f / 255.0f);
+        var fogColor = new Vector3(1.0f / 255.0f, 121.0f / 255.0f, 184.0f / 255.0f);
         float fogDensity = 0.0050f;
 
         int locFogColor = _shader.GetUniformLocation("uFogColor");

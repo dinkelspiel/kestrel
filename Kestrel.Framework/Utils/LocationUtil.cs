@@ -4,8 +4,12 @@ namespace Kestrel.Framework.Utils;
 
 public static class LocationUtil
 {
+
+    static readonly Dictionary<(int radius, int ry), (int dx, int dy, int dz)[]> _cache = new();
+
     public static IEnumerable<(int x, int y, int z)> CoordsNearestFirst(int radius, int cx, int cy, int cz)
     {
+
         int ry = Math.Max(0, radius / 2);                // half height in Y
         int r2 = radius * radius;                        // XZ radius^2 (euclidean)
 
@@ -83,6 +87,6 @@ public static class LocationUtil
         float dy = a.Y - b.Y;
         float dz = a.Z - b.Z;
 
-        return MathF.Sqrt(dx * dx + dy * dy + dz * dz);
+        return MathF.Sqrt(dx * dx + dy * dy * 6 + dz * dz);
     }
 }

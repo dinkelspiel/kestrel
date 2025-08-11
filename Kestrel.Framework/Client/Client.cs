@@ -52,7 +52,7 @@ public class Client
             _input.Keyboards[i].KeyDown += KeyDown;
 
         _gl = _window.CreateOpenGL();
-        _gl.ClearColor(Color.FromArgb(105, 196, 224));
+        _gl.ClearColor(Color.FromArgb(1, 121, 184));
         _gl.Viewport(0, 0, (uint)_window.Size.X, (uint)_window.Size.Y);
 
         if (Environment.GetCommandLineArgs().Length != 2)
@@ -124,6 +124,8 @@ public class Client
 
     private void OnUpdate(double deltaTime)
     {
+        clientState.Profiler.Tick += 1;
+
         var _keyboard = _input.Keyboards[0];
         float cameraSpeed = 150.0f * (float)deltaTime;
 
@@ -155,16 +157,19 @@ public class Client
 
         if (playerMoved && clientState.NetServer != null && hasMovedBetweenChunks)
         {
-            List<Vector3I> _requestedChunksCache = [.. clientState.RequestedChunksQueue];
-            foreach (var targetChunk in _requestedChunksCache)
+            clientState.Profiler.Start("Requested chunks distance culling", () =>
             {
-                bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.ToVector3()) > clientState.RenderDistance * 1.5;
-                if (condition)
+                List<Vector3I> _requestedChunksCache = [.. clientState.RequestedChunksQueue];
+                foreach (var targetChunk in _requestedChunksCache)
                 {
-                    clientState.RequestedChunks.Remove(targetChunk);
-                    clientState.RequestedChunksQueue.Remove(targetChunk);
+                    bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.ToVector3()) > clientState.RenderDistance * 1.5;
+                    if (condition)
+                    {
+                        clientState.RequestedChunks.Remove(targetChunk);
+                        clientState.RequestedChunksQueue.Remove(targetChunk);
+                    }
                 }
-            }
+            });
 
 
             // List<KeyValuePair<Vector3I, ChunkMesh>> _chunkMeshes = clientState.ChunkMeshes.ToList();
@@ -178,23 +183,38 @@ public class Client
             // }
 
 
-            clientState.Player.LastFrameChunkPos = chunkPos;
-
-            foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(clientState.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
+            clientState.Profiler.Start("Request close chunks", () =>
             {
-                clientState.RequestChunk(new(x, y, z));
-            }
+                clientState.Player.LastFrameChunkPos = chunkPos;
 
-            clientState.NetServer.Send(PacketManager.SerializeC2SPacket(new C2SPlayerMove(clientState.Player.Location)), DeliveryMethod.ReliableUnordered);
+                foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(clientState.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
+                {
+                    clientState.RequestChunk(new(x, y, z));
+                }
+            });
+
+            clientState.Profiler.Start("Send player move packet", () =>
+            {
+                clientState.NetServer.Send(PacketManager.SerializeC2SPacket(new C2SPlayerMove(clientState.Player.Location)), DeliveryMethod.ReliableUnordered);
+            });
         }
 
 
-        TimeSpan elapsed = DateTime.Now - lastRequestedChunks;
-        if (elapsed.TotalMilliseconds > 500)
+
+        clientState.Profiler.Start("Request chunks from queue", () =>
         {
-            lastRequestedChunks = DateTime.Now;
-            clientState.RequestChunksFromQueue();
-        }
+            TimeSpan elapsed = DateTime.Now - lastRequestedChunks;
+            if (elapsed.TotalMilliseconds > 500)
+            {
+                lastRequestedChunks = DateTime.Now;
+                clientState.RequestChunksFromQueue();
+            }
+        });
+
+        clientState.Profiler.Start("Generate chunks meshes under limit", () =>
+        {
+            clientState.ChunkMeshManager.GenerateFromQueueUnderTimeLimit(4);
+        });
 
         networkClient.PollEvents();
     }
@@ -203,7 +223,10 @@ public class Client
     {
         _gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        quad.Draw();
+        clientState.Profiler.Start("Rendering", () =>
+        {
+            quad.Draw();
+        });
     }
 
     private void KeyDown(IKeyboard keyboard, Key key, int keyCode)
@@ -212,6 +235,7 @@ public class Client
         {
             networkClient.Stop();
             _window.Close();
+            clientState.Profiler.Build();
         }
 
         if (key == Key.F11)

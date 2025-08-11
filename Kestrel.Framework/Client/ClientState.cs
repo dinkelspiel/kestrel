@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Numerics;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics;
@@ -17,13 +18,15 @@ public class ClientState
     public Kestrel.Framework.Client.Graphics.Window Window;
     public Camera Camera;
     public ClientPlayer Player;
-    public Dictionary<String, ClientPlayer> Players = [];
+    public ConcurrentDictionary<String, ClientPlayer> Players = [];
     public NetPeer NetServer;
     public World World;
-    public Dictionary<Vector3I, ChunkMesh> ChunkMeshes = [];
-    public int RenderDistance = 6;
-    public List<Vector3I> RequestedChunks = [];
-    public List<Vector3I> RequestedChunksQueue = [];
+    public ConcurrentDictionary<Vector3I, ChunkMesh> ChunkMeshes = [];
+    public ChunkMeshManager ChunkMeshManager = new();
+    public int RenderDistance = 12;
+    public HashSet<Vector3I> RequestedChunks = [];
+    public HashSet<Vector3I> RequestedChunksQueue = [];
+    public Profiler Profiler = new();
 
     public ClientState(GL gl, IWindow silkWindow)
     {
@@ -58,7 +61,7 @@ public class ClientState
         });
 
 
-        int batchCount = 8;
+        int batchCount = Math.Min(8, queueSortedByDistance.Count);
         NetServer.Send(PacketManager.SerializeC2SPacket(new C2SChunkRequest
         {
             ChunkCount = batchCount,

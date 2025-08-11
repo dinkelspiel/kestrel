@@ -70,7 +70,7 @@ public class S2CPlayerLoginSuccess : IS2CPacket
                 continue; // Skip self
             }
 
-            context.Players.Add(player.Name, new ClientPlayer
+            context.Players.TryAdd(player.Name, new ClientPlayer
             {
                 Name = player.Name,
                 Location = player.Location

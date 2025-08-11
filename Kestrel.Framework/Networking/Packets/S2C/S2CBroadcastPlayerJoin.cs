@@ -40,7 +40,7 @@ public class S2CBroadcastPlayerJoin : IS2CPacket
 
         if (!context.Players.ContainsKey(PlayerName))
         {
-            context.Players.Add(PlayerName, new ClientPlayer()
+            context.Players.TryAdd(PlayerName, new ClientPlayer()
             {
                 Name = PlayerName,
                 Location = new Vector3(Position.X, Position.Y, Position.Z)
