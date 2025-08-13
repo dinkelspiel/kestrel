@@ -19,7 +19,10 @@ public class Chunk
     public void Generate()
     {
         IsEmpty = true;
-        for (int i = 0; i < World.ChunkSize * World.ChunkSize * World.ChunkSize; i++)
+        Parallel.For(0, World.ChunkSize * World.ChunkSize * World.ChunkSize, new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        }, (i) =>
         {
             var (x, y, z) = IndexToChunk(i);
             var (wx, wy, wz) = ChunkToWorld(x, y, z);
@@ -28,7 +31,7 @@ public class Chunk
 
             if (block != BlockType.Air)
                 IsEmpty = false;
-        }
+        });
     }
 
     public BlockType? GetBlock(int x, int y, int z)
@@ -42,12 +45,24 @@ public class Chunk
         return Blocks[ChunkToIndex(x, y, z)];
     }
 
+    public void SetBlock(int lx, int ly, int lz, BlockType block)
+    {
+        if (lx < 0 || lx >= World.ChunkSize ||
+    ly < 0 || ly >= World.ChunkSize ||
+    lz < 0 || lz >= World.ChunkSize)
+        {
+            return;
+        }
+
+        Blocks[ChunkToIndex(lx, ly, lz)] = block;
+    }
+
     public int ChunkToIndex(int x, int y, int z)
     {
         return x + y * World.ChunkSize + z * World.ChunkSize * World.ChunkSize;
     }
 
-    public (int x, int y, int z) IndexToChunk(int index)
+    public (int lx, int ly, int lz) IndexToChunk(int index)
     {
         int x = index % World.ChunkSize;
         int y = index / World.ChunkSize % World.ChunkSize;
@@ -55,10 +70,10 @@ public class Chunk
         return (x, y, z);
     }
 
-    public (int wx, int wy, int wz) ChunkToWorld(int x, int y, int z)
+    public (int wx, int wy, int wz) ChunkToWorld(int lx, int ly, int lz)
     {
-        return (ChunkX * World.ChunkSize + x,
-                ChunkY * World.ChunkSize + y,
-                ChunkZ * World.ChunkSize + z);
+        return (ChunkX * World.ChunkSize + lx,
+                ChunkY * World.ChunkSize + ly,
+                ChunkZ * World.ChunkSize + lz);
     }
 }

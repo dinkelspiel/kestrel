@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Kestrel.Framework.Utils;
 
 namespace Kestrel.Framework.World;
@@ -5,8 +6,13 @@ namespace Kestrel.Framework.World;
 public sealed class World
 {
     public readonly int ChunkSize = 32;
-    private readonly Dictionary<Vector3I, Chunk> _chunks = new();
-    public Generator Generator = new();
+    private readonly ConcurrentDictionary<Vector3I, Chunk> _chunks = new();
+    public Generator Generator;
+
+    public World()
+    {
+        Generator = new(this);
+    }
 
     public Chunk GetChunkOrGenerate(int cx, int cy, int cz)
     {
@@ -18,10 +24,24 @@ public sealed class World
 
         Chunk newChunk = new(this, cx, cy, cz);
         newChunk.Generate();
-        _chunks.Add(chunkPos, newChunk);
+        _chunks.TryAdd(chunkPos, newChunk);
         return newChunk;
     }
 
+    public bool LocationIsLoaded(int wx, int wy, int wz, out Chunk chunk)
+    {
+        WorldToChunk(wx, wy, wz, ChunkSize, out var chunkPos, out var _);
+        Chunk? c = GetChunk(chunkPos.X, chunkPos.Y, chunkPos.Z);
+        if (c != null)
+        {
+            chunk = c;
+            return true;
+        }
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        chunk = null;
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+        return false;
+    }
 
     public Chunk? GetChunk(int cx, int cy, int cz)
     {

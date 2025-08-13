@@ -12,6 +12,8 @@ public class Mesher
         BlockType.Stone => (0, 0),
         BlockType.Dirt => (1, 0),
         BlockType.Grass => (2, 0),
+        BlockType.Water => (3, 0),
+        BlockType.Leaves => (4, 0),
         _ => throw new NotImplementedException(),
     };
 

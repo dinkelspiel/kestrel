@@ -199,8 +199,6 @@ public class Client
             });
         }
 
-
-
         clientState.Profiler.Start("Request chunks from queue", () =>
         {
             TimeSpan elapsed = DateTime.Now - lastRequestedChunks;
@@ -213,7 +211,7 @@ public class Client
 
         clientState.Profiler.Start("Generate chunks meshes under limit", () =>
         {
-            clientState.ChunkMeshManager.GenerateFromQueueUnderTimeLimit(4);
+            clientState.ChunkMeshManager.GenerateFromQueueUnderTimeLimit(8);
         });
 
         networkClient.PollEvents();

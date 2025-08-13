@@ -39,15 +39,18 @@ public struct C2SChunkRequest : IC2SPacket
 
     public void Handle(ServerState context, NetPeer client)
     {
+        var chunks = Chunks;
         Chunk[] generatedChunks = new Chunk[ChunkCount];
-        int index = -1;
-        foreach (var chunkPos in Chunks)
-        {
-            index++;
-            Chunk chunk = context.World.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z);
 
-            generatedChunks[index] = chunk;
-        }
+        Parallel.For(0, ChunkCount, new ParallelOptions
+        {
+            MaxDegreeOfParallelism = Environment.ProcessorCount
+        }, (i) =>
+        {
+            var chunkPos = chunks[i];
+            generatedChunks[i] = context.World.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z);
+        });
+
         client.Send(PacketManager.SerializeS2CPacket(new S2CChunkResponse(generatedChunks)), DeliveryMethod.ReliableUnordered);
     }
 }

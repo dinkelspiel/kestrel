@@ -33,7 +33,7 @@ public struct C2SPlayerLoginRequest(String playerName) : IC2SPacket
     {
         if (!context.PlayersByName.ContainsKey(PlayerName))
         {
-            vec3 location = new(0, 120, 0);
+            vec3 location = new(-416, 80, 383);
             ServerPlayer serverPlayer = new ServerPlayer()
             {
                 Name = PlayerName,
