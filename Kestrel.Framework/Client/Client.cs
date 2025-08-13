@@ -21,6 +21,7 @@ namespace Kestrel.Framework.Platform;
 
 public class Client
 {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     private IWindow _window;
     private IInputContext _input;
     public ClientState clientState;
@@ -28,6 +29,7 @@ public class Client
     private ShaderProgram _shaderProgram;
     private QuadMesh quad;
     NetManager networkClient;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     private DateTime lastRequestedChunks = DateTime.Now;
 
     public void Run()

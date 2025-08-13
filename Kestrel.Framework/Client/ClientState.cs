@@ -28,7 +28,9 @@ public class ClientState
     public HashSet<Vector3I> RequestedChunksQueue = [];
     public Profiler Profiler = new();
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     public ClientState(GL gl, IWindow silkWindow)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
     {
         Window = new(gl, 800, 600);
         silkWindow.FramebufferResize += @Window.OnResize;
