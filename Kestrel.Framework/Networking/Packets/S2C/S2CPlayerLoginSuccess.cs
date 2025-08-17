@@ -1,5 +1,6 @@
 using System.Numerics;
 using GlmSharp;
+using Kestrel.Framework.Entity;
 using Kestrel.Framework.Networking.Packets.C2S;
 using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
@@ -12,32 +13,17 @@ namespace Kestrel.Framework.Networking.Packets.S2C;
 public class S2CPlayerLoginSuccess : IS2CPacket
 {
     public ushort PacketId => 2;
-    public Vector3 Position;
-    public int PlayerCount;
-    public List<ClientPlayer> Players;
+    public int EntityCount;
+    public Dictionary<int, INetworkableComponent[]> Entities;
 
     public void Deserialize(NetDataReader reader)
     {
-        Position.X = reader.GetFloat();
-        Position.Y = reader.GetFloat();
-        Position.Z = reader.GetFloat();
-        PlayerCount = reader.GetInt();
-        Players = [];
-        for (int i = 0; i < PlayerCount; i++)
+        EntityCount = reader.GetInt();
+        Entities = [];
+        for (int i = 0; i < EntityCount; i++)
         {
-            string playerName = reader.GetString(64);
-            Vector3 location = new()
-            {
-                X = reader.GetFloat(),
-                Y = reader.GetFloat(),
-                Z = reader.GetFloat()
-            };
-
-            Players.Add(new ClientPlayer
-            {
-                Name = playerName,
-                Location = location
-            });
+            var componentCount = reader.GetInt();
+            var components = new INetworkableComponent[componentCount];
         }
     }
 

@@ -7,7 +7,7 @@ public class Profiler
     public List<string> Labels = [];
     public bool Enabled = false;
 
-    public void Start(String label, Action action)
+    public void Start(string label, Action action)
     {
         if (!Enabled)
         {
@@ -50,7 +50,7 @@ public class Profiler
             return;
 
         StringBuilder sb = new();
-        String line = "";
+        string line = "";
         foreach (var label in Labels)
         {
             line += $",{label}";

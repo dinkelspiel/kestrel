@@ -9,7 +9,7 @@ namespace Kestrel.Framework.Networking.Packets.S2C;
 public class S2CBroadcastPlayerMove : IS2CPacket
 {
     public ushort PacketId => 4;
-    public String PlayerName;
+    public string PlayerName;
     public Vector3 Position;
 
     public void Deserialize(NetDataReader reader)

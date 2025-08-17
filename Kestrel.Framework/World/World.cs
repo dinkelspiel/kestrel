@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using ArchWorld = Arch.Core.World;
 using Kestrel.Framework.Utils;
 
 namespace Kestrel.Framework.World;
@@ -8,9 +9,11 @@ public sealed class World
     public readonly int ChunkSize = 32;
     private readonly ConcurrentDictionary<Vector3I, Chunk> _chunks = new();
     public Generator Generator;
+    public ArchWorld Entities;
 
     public World()
     {
+        Entities = ArchWorld.Create();
         Generator = new(this);
     }
 

@@ -18,7 +18,7 @@ public class ClientState
     public Kestrel.Framework.Client.Graphics.Window Window;
     public Camera Camera;
     public ClientPlayer Player;
-    public ConcurrentDictionary<String, ClientPlayer> Players = [];
+    public ConcurrentDictionary<string, ClientPlayer> Players = [];
     public NetPeer NetServer;
     public World World;
     public ConcurrentDictionary<Vector3I, ChunkMesh> ChunkMeshes = [];

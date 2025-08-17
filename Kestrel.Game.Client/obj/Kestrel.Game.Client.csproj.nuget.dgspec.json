@@ -50,6 +50,10 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Arch": {
+              "target": "Package",
+              "version": "[2.1.0-beta, )"
+            },
             "GlmSharp": {
               "target": "Package",
               "version": "[0.9.8, )"

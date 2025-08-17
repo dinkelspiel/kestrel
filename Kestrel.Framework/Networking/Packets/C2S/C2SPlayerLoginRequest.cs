@@ -9,9 +9,9 @@ using LiteNetLib.Utils;
 
 namespace Kestrel.Framework.Networking.Packets.C2S;
 
-public struct C2SPlayerLoginRequest(String playerName) : IC2SPacket
+public struct C2SPlayerLoginRequest(string playerName) : IC2SPacket
 {
-    public String PlayerName = playerName;
+    public string PlayerName = playerName;
 
     public readonly ushort PacketId => 1;
 

@@ -54,7 +54,7 @@ public class ShaderProgram
         gl.UseProgram(GlProgram);
     }
 
-    public int GetUniformLocation(String uniform)
+    public int GetUniformLocation(string uniform)
     {
         return gl.GetUniformLocation(GlProgram, uniform);
     }

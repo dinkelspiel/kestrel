@@ -1,9 +1,14 @@
 ﻿using System.Collections.Concurrent;
+using Arch.Core;
+using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Networking;
 using Kestrel.Framework.Networking.Packets;
 using Kestrel.Framework.Networking.Packets.C2S;
+using Kestrel.Framework.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using ArchWorld = Arch.Core.World;
+using ArchEntity = Arch.Core.Entity;
 
 namespace Kestrel.Framework.Server;
 
@@ -18,6 +23,9 @@ public class Server
         ServerState.NetServer.Start(9050 /* port */);
 
         ServerState.World = new();
+        ServerState.Entities = ArchWorld.Create();
+
+        ServerState.Entities.Create(new Location(-416, 80, 383), new ModelRenderer(""));
 
         PacketRegistry.RegisterPackets();
 
@@ -53,7 +61,14 @@ public class Server
         while (!Console.KeyAvailable)
         {
             ServerState.NetServer.PollEvents();
-            Thread.Sleep(15);
+
+            ServerState.Entities.Query(new QueryDescription().WithAll<Location>(), (ArchEntity entity, ref Location location) =>
+            {
+                if (LocationUtil.Distance(new(location.X, location.Y, location.Z), new(location.LastUpdatedX, location.LastUpdatedY, location.LastUpdatedZ)) > 5)
+                {
+
+                }
+            });
         }
         ServerState.NetServer.Stop();
     }

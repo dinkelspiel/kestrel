@@ -47,3 +47,9 @@ D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\obj\Debug\net8.0\refint\Ke
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\obj\Debug\net8.0\Kestrel.Game.Client.pdb
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\obj\Debug\net8.0\Kestrel.Game.Client.genruntimeconfig.cache
 D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\obj\Debug\net8.0\ref\Kestrel.Game.Client.dll
+D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\Arch.dll
+D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\Arch.LowLevel.dll
+D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\Collections.Pooled.dll
+D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\CommunityToolkit.HighPerformance.dll
+D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\Microsoft.Extensions.ObjectPool.dll
+D:\Projects2025\Coding\C#\kestrel\Kestrel.Game.Client\bin\Debug\net8.0\Schedulers.dll

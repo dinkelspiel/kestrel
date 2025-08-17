@@ -1,15 +1,20 @@
 {
   "version": 2,
-  "dgSpecHash": "0MzlWIsYccI=",
+  "dgSpecHash": "ndsClv/dVTM=",
   "success": true,
   "projectFilePath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Game.Client\\Kestrel.Game.Client.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\wille\\.nuget\\packages\\arch\\2.1.0-beta\\arch.2.1.0-beta.nupkg.sha512",
+    "C:\\Users\\wille\\.nuget\\packages\\arch.lowlevel\\1.1.5\\arch.lowlevel.1.1.5.nupkg.sha512",
+    "C:\\Users\\wille\\.nuget\\packages\\collections.pooled\\2.0.0-preview.27\\collections.pooled.2.0.0-preview.27.nupkg.sha512",
+    "C:\\Users\\wille\\.nuget\\packages\\communitytoolkit.highperformance\\8.2.2\\communitytoolkit.highperformance.8.2.2.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\glmsharp\\0.9.8\\glmsharp.0.9.8.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\imgui.net\\1.91.6.1\\imgui.net.1.91.6.1.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\litenetlib\\1.3.1\\litenetlib.1.3.1.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\microsoft.dotnet.platformabstractions\\3.1.6\\microsoft.dotnet.platformabstractions.3.1.6.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\microsoft.extensions.dependencymodel\\8.0.0\\microsoft.extensions.dependencymodel.8.0.0.nupkg.sha512",
+    "C:\\Users\\wille\\.nuget\\packages\\microsoft.extensions.objectpool\\7.0.0\\microsoft.extensions.objectpool.7.0.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.11\\microsoft.net.illink.tasks.8.0.11.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\silk.net\\2.22.0\\silk.net.2.22.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\silk.net.core\\2.22.0\\silk.net.core.2.22.0.nupkg.sha512",
@@ -32,7 +37,8 @@
     "C:\\Users\\wille\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\system.text.encodings.web\\8.0.0\\system.text.encodings.web.8.0.0.nupkg.sha512",
     "C:\\Users\\wille\\.nuget\\packages\\system.text.json\\8.0.0\\system.text.json.8.0.0.nupkg.sha512",
-    "C:\\Users\\wille\\.nuget\\packages\\ultz.native.glfw\\3.4.0\\ultz.native.glfw.3.4.0.nupkg.sha512"
+    "C:\\Users\\wille\\.nuget\\packages\\ultz.native.glfw\\3.4.0\\ultz.native.glfw.3.4.0.nupkg.sha512",
+    "C:\\Users\\wille\\.nuget\\packages\\zeroallocjobscheduler\\1.1.2\\zeroallocjobscheduler.1.1.2.nupkg.sha512"
   ],
   "logs": [
     {
