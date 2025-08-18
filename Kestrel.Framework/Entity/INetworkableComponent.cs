@@ -4,7 +4,7 @@ using LiteNetLib.Utils;
 
 public interface INetworkableComponent
 {
-    int PacketId { get; }
+    ushort PacketId { get; }
 
     void Serialize(NetDataWriter writer);
     void Deserialize(NetDataReader reader);

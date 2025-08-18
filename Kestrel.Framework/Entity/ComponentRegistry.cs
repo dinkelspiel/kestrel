@@ -1,28 +1,39 @@
-using System.Reflection;
+using Kestrel.Framework.Entity;
+using Kestrel.Framework.Entity.Components;
+using Kestrel.Framework.Networking.Packets.C2S;
+using Kestrel.Framework.Networking.Packets.S2C;
 
-namespace Kestrel.Framework.Entity;
+namespace Kestrel.Framework.Networking.Packets;
 
-public class ComponentRegistry
+public static class ComponentRegistry
 {
-    INetworkableComponent[] components;
-    string targetNamespace = "Kestrel.Framework.Entity.Components";
+    private static Dictionary<ushort, INetworkableComponent> components = [];
 
-    public ComponentRegistry()
+    public static void RegisterComponents()
     {
-        Assembly.GetExecutingAssembly()
-            .GetTypes()
-            .Where(t =>
-                t.IsValueType &&
-                t.IsAssignableTo(typeof(INetworkableComponent)) &&
-                t.Namespace == targetNamespace &&
-                t.IsDefined(typeof(System.Runtime.CompilerServices.IsReadOnlyAttribute), false) // heuristic for record struct
-            )
-            .ToList();
+        Register(new DisplayName());
+        Register(new Location());
+        Register(new Player());
+        Register(new Velocity());
     }
 
-    public void asd()
+    public static void Register(INetworkableComponent component)
     {
+        components.Add(component.PacketId, component);
+    }
 
-        var components =
+    public static bool TryGetComponent(ushort packetId, out INetworkableComponent? component)
+    {
+        if (components == null)
+        {
+            throw new Exception("Components not registered. Call RegisterComponents() first.");
+        }
+        if (components.TryGetValue(packetId, out var _component))
+        {
+            component = _component;
+            return true;
+        }
+        component = null;
+        return false;
     }
 }
