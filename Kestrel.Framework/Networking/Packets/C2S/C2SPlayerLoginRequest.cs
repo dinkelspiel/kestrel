@@ -1,11 +1,13 @@
 using System.Numerics;
 using System.Text;
 using GlmSharp;
+using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Server;
 using Kestrel.Framework.Server.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using ArchEntity = Arch.Core.Entity;
 
 namespace Kestrel.Framework.Networking.Packets.C2S;
 
@@ -33,16 +35,18 @@ public struct C2SPlayerLoginRequest(string playerName) : IC2SPacket
     {
         if (!context.PlayersByName.ContainsKey(PlayerName))
         {
-            vec3 location = new(-416, 80, 383);
-            ServerPlayer serverPlayer = new ServerPlayer()
+            vec3 location = new();
+            ServerPlayer serverPlayer = new()
             {
                 Name = PlayerName,
                 Location = location,
                 NetClient = client
             };
 
-            context.PlayersByName.TryAdd(PlayerName, serverPlayer);
-            context.PlayersByConnection.TryAdd(client, serverPlayer);
+            ArchEntity player = context.Entities.Create(new Player(PlayerName), new Location(-416, 80, 383), new Nametag(PlayerName), new Velocity(0, 0, 0));
+
+            context.PlayersByName.TryAdd(PlayerName, player);
+            context.PlayersByConnection.TryAdd(client, player);
 
             client.Send(PacketManager.SerializeS2CPacket(new S2CPlayerLoginSuccess()
             {

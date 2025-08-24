@@ -4,7 +4,7 @@ using LiteNetLib.Utils;
 
 public record struct Velocity(float X, float Y, float Z) : INetworkableComponent
 {
-    public readonly int PacketId => 2;
+    public readonly ushort PacketId => 2;
 
     public void Deserialize(NetDataReader reader)
     {

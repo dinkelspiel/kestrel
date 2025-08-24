@@ -2,9 +2,9 @@ using LiteNetLib.Utils;
 
 namespace Kestrel.Framework.Entity.Components;
 
-public record struct DisplayName(string Name) : INetworkableComponent
+public record struct Nametag(string Name) : INetworkableComponent
 {
-    public readonly int PacketId => 3;
+    public readonly ushort PacketId => 3;
 
     public void Deserialize(NetDataReader reader)
     {

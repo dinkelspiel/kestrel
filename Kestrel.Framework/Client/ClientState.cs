@@ -8,19 +8,24 @@ using Kestrel.Framework.Networking.Packets;
 using Kestrel.Framework.Networking.Packets.C2S;
 using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
-using Kestrel.Framework.World;
+using KestrelWorld = Kestrel.Framework.World.World;
 using LiteNetLib;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using ArchWorld = Arch.Core.World;
+using ArchEntity = Arch.Core.Entity;
+using Kestrel.Framework.Entity.Components;
+using Arch.Core;
+using Arch.Core.Extensions;
 
 public class ClientState
 {
     public Kestrel.Framework.Client.Graphics.Window Window;
     public Camera Camera;
-    public ClientPlayer Player;
-    public ConcurrentDictionary<string, ClientPlayer> Players = [];
+    public ArchEntity Player;
+    public ArchWorld Entities;
     public NetPeer NetServer;
-    public World World;
+    public KestrelWorld World;
     public ConcurrentDictionary<Vector3I, ChunkMesh> ChunkMeshes = [];
     public ChunkMeshManager ChunkMeshManager = new();
     public int RenderDistance = 12;
@@ -50,8 +55,13 @@ public class ClientState
     {
         if (RequestedChunksQueue.Count == 0 || NetServer == null) return;
 
+        if (!Player.Has<Location>())
+            throw new Exception("Player does not have required Location component.");
+
+        Location playerLocation = Player.Get<Location>();
+
         World.WorldToChunk(
-            (int)Player.Location.X, (int)Player.Location.Y, (int)Player.Location.Z,
+            (int)playerLocation.X, (int)playerLocation.Y, (int)playerLocation.Z,
             out var playerChunk, out _);
 
         var queueSortedByDistance = new List<Vector3I>(RequestedChunksQueue);

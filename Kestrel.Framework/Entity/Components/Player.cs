@@ -4,7 +4,7 @@ namespace Kestrel.Framework.Entity.Components;
 
 public record struct Player(string Name) : INetworkableComponent
 {
-    public readonly int PacketId => 4;
+    public readonly ushort PacketId => 4;
 
     public void Deserialize(NetDataReader reader)
     {

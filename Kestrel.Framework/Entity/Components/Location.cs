@@ -4,7 +4,7 @@ namespace Kestrel.Framework.Entity.Components;
 
 public record struct Location(float X, float Y, float Z) : INetworkableComponent
 {
-    public readonly int PacketId => 1;
+    public readonly ushort PacketId => 1;
 
     public float LastUpdatedX = X;
     public float LastUpdatedY = Y;

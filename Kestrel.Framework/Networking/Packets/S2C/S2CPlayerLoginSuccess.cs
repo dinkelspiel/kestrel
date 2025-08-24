@@ -1,4 +1,6 @@
+using System.Formats.Asn1;
 using System.Numerics;
+using ArchEntity = Arch.Core.Entity;
 using GlmSharp;
 using Kestrel.Framework.Entity;
 using Kestrel.Framework.Networking.Packets.C2S;
@@ -7,6 +9,7 @@ using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using Arch.Core;
 
 namespace Kestrel.Framework.Networking.Packets.S2C;
 
@@ -24,26 +27,39 @@ public class S2CPlayerLoginSuccess : IS2CPacket
         {
             var componentCount = reader.GetInt();
             var components = new INetworkableComponent[componentCount];
+            for (int j = 0; j < componentCount; j++)
+            {
+                INetworkableComponent component = ComponentManager.DeserializeComponent(reader);
+                components[j] = component;
+            }
         }
     }
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put(Position.X);
-        writer.Put(Position.Y);
-        writer.Put(Position.Z);
-        writer.Put(PlayerCount);
-        foreach (var player in Players)
+        writer.Put(EntityCount);
+        foreach (var entity in Entities)
         {
-            writer.Put(player.Name, 64);
-            writer.Put(player.Location.X);
-            writer.Put(player.Location.Y);
-            writer.Put(player.Location.Z);
+            writer.Put(entity.Key);
+            writer.Put(entity.Value.Length);
+            foreach (var component in entity.Value)
+            {
+                ComponentManager.SerializeComponent(component, writer);
+            }
         }
     }
 
     public void Handle(ClientState context, NetPeer server)
     {
+        foreach (var entity in Entities)
+        {
+            ArchEntity archEntity = context.Entities.Create();
+            foreach (var component in entity.Value)
+            {
+                context.Entities.Add(archEntity, component);
+            }
+        }
+
         context.Player.Location = new Vector3(Position.X, Position.Y, Position.Z);
 
         context.World.WorldToChunk((int)Position.X, (int)Position.Y, (int)Position.Z, out var chunkPos, out _);
