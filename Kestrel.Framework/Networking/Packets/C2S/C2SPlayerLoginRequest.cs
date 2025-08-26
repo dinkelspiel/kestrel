@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Text;
 using GlmSharp;
+using Kestrel.Framework.Entity;
 using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Server;
@@ -48,15 +49,17 @@ public struct C2SPlayerLoginRequest(string playerName) : IC2SPacket
             context.PlayersByName.TryAdd(PlayerName, player);
             context.PlayersByConnection.TryAdd(client, player);
 
+            Dictionary<int, INetworkableComponent[]> packetEntities = [];
+
+            context.Entities.Query(new Arch.Core.QueryDescription().WithAll<INetworkableComponent>(), (ArchEntity entity, ref INetworkableComponent component) =>
+            {
+                
+            });
+
             client.Send(PacketManager.SerializeS2CPacket(new S2CPlayerLoginSuccess()
             {
-                Position = new(location.x, location.y, location.z),
-                PlayerCount = context.PlayersByName.Count,
-                Players = context.PlayersByName.Values.Select(p => new ClientPlayer
-                {
-                    Name = p.Name,
-                    Location = new Vector3(p.Location.x, p.Location.y, p.Location.z)
-                }).ToList()
+                EntityCount = context.Entities.CountEntities(new Arch.Core.QueryDescription().WithAll<INetworkableComponent>()),
+                Entities = 
             }), DeliveryMethod.ReliableOrdered);
 
             context.NetServer.SendToAll(PacketManager.SerializeS2CPacket(new S2CBroadcastPlayerJoin()

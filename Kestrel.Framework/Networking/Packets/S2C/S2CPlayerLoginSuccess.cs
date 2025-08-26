@@ -10,6 +10,7 @@ using Kestrel.Framework.World;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Arch.Core;
+using Kestrel.Framework.Entity.Components;
 
 namespace Kestrel.Framework.Networking.Packets.S2C;
 
@@ -53,7 +54,7 @@ public class S2CPlayerLoginSuccess : IS2CPacket
     {
         foreach (var entity in Entities)
         {
-            ArchEntity archEntity = context.Entities.Create();
+            ArchEntity archEntity = context.Entities.Create(new ServerId(entity.Key));
             foreach (var component in entity.Value)
             {
                 context.Entities.Add(archEntity, component);

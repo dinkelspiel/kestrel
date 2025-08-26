@@ -22,7 +22,7 @@ public static class NetworkSnapshot
 
     static ComponentType? TryGetComponentType(Type t)
     {
-        try { return ComponentRegistry.GetComponentType(t); }
+        try { return Arch.Core.ComponentRegistry.TypeToComponentType[t]; }
         catch { return null; } // not registered yet, ignore
     }
 
