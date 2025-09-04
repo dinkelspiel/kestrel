@@ -1,10 +1,14 @@
 using System.Numerics;
 using System.Text;
+using Arch.Core;
+using Arch.Core.Extensions;
+using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Server;
 using Kestrel.Framework.Server.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
+using ArchEntity = Arch.Core.Entity;
 
 namespace Kestrel.Framework.Networking.Packets.C2S;
 
@@ -16,10 +20,12 @@ public struct C2SPlayerMove(Vector3 location) : IC2SPacket
 
     public void Deserialize(NetDataReader reader)
     {
-        Location = new();
-        Location.X = reader.GetFloat();
-        Location.Y = reader.GetFloat();
-        Location.Z = reader.GetFloat();
+        Location = new()
+        {
+            X = reader.GetFloat(),
+            Y = reader.GetFloat(),
+            Z = reader.GetFloat()
+        };
     }
 
     public void Serialize(NetDataWriter writer)
@@ -31,20 +37,18 @@ public struct C2SPlayerMove(Vector3 location) : IC2SPacket
 
     public void Handle(ServerState context, NetPeer client)
     {
-        ServerPlayer player = context.PlayersByConnection[client];
-        if (client == null)
+        if (!context.PlayersByConnection.TryGetValue(client, out ArchEntity player))
         {
             Console.WriteLine($"Client not found in context.");
             return;
         }
+        player.Get<Location>().Postion = Location;
+        var playerServerId = player.Get<ServerId>().Id;
 
-        player.Location = new(Location.X, Location.Y, Location.Z);
-
-
-        context.NetServer.SendToAll(PacketManager.SerializeS2CPacket(new S2CBroadcastPlayerMove()
+        context.NetServer.SendToAll(PacketManager.SerializeS2CPacket(new S2CBroadcastEntityMove()
         {
-            PlayerName = player.Name,
-            Position = new Vector3(player.Location.x, player.Location.y, player.Location.z)
+            ServerId = playerServerId,
+            Position = new Vector3(Location.X, Location.Y, Location.Z)
         }), DeliveryMethod.ReliableOrdered);
     }
 }

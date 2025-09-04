@@ -23,7 +23,9 @@ public class ClientState
     public Kestrel.Framework.Client.Graphics.Window Window;
     public Camera Camera;
     public ArchEntity Player;
+    public string PlayerName;
     public ArchWorld Entities;
+    public ConcurrentDictionary<int, ArchEntity> ServerIdToEntity = [];
     public NetPeer NetServer;
     public KestrelWorld World;
     public ConcurrentDictionary<Vector3I, ChunkMesh> ChunkMeshes = [];

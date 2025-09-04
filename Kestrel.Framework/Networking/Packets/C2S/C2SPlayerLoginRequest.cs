@@ -51,15 +51,16 @@ public struct C2SPlayerLoginRequest(string playerName) : IC2SPacket
 
             Dictionary<int, INetworkableComponent[]> packetEntities = [];
 
-            context.Entities.Query(new Arch.Core.QueryDescription().WithAll<INetworkableComponent>(), (ArchEntity entity, ref INetworkableComponent component) =>
+            context.Entities.Query(new Arch.Core.QueryDescription().WithAll<ServerId>(), (ArchEntity entity, ref ServerId component) =>
             {
-                
+                var components = context.Entities.GetAllComponents(entity);
+                packetEntities[component.Id] = components;
             });
 
             client.Send(PacketManager.SerializeS2CPacket(new S2CPlayerLoginSuccess()
             {
                 EntityCount = context.Entities.CountEntities(new Arch.Core.QueryDescription().WithAll<INetworkableComponent>()),
-                Entities = 
+                Entities =
             }), DeliveryMethod.ReliableOrdered);
 
             context.NetServer.SendToAll(PacketManager.SerializeS2CPacket(new S2CBroadcastPlayerJoin()

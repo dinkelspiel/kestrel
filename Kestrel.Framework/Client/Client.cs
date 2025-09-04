@@ -4,6 +4,7 @@ using GlmSharp;
 using Kestrel.Framework.Client.Graphics;
 using Kestrel.Framework.Client.Graphics.Buffers;
 using Kestrel.Framework.Client.Graphics.Shaders;
+using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Networking;
 using Kestrel.Framework.Networking.Packets;
 using Kestrel.Framework.Networking.Packets.C2S;
@@ -16,6 +17,7 @@ using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
+using ArchEntity = Arch.Core.Entity;
 
 namespace Kestrel.Framework.Platform;
 
@@ -65,12 +67,7 @@ public class Client
 
         clientState = new(_gl, _window)
         {
-            Player = new()
-            {
-                Name = Environment.GetCommandLineArgs()[1],
-                Location = new(0, 0, 0),
-                LastFrameChunkPos = new(0, 0, 0)
-            },
+            PlayerName = Environment.GetCommandLineArgs()[1],
             World = new()
         };
 
@@ -118,7 +115,7 @@ public class Client
             Console.WriteLine("Connected to server!");
             clientState.NetServer = peer;
 
-            C2SPlayerLoginRequest loginRequest = new(clientState.Player.Name);
+            C2SPlayerLoginRequest loginRequest = new(clientState.PlayerName);
 
             clientState.NetServer.Send(PacketManager.SerializeC2SPacket(loginRequest), DeliveryMethod.ReliableOrdered);
         };
@@ -131,75 +128,71 @@ public class Client
         var _keyboard = _input.Keyboards[0];
         float cameraSpeed = 150.0f * (float)deltaTime;
 
-        bool playerMoved = false;
-        if (_keyboard.IsKeyPressed(Key.W))
+        clientState.Entities.Query(new Arch.Core.QueryDescription().WithAll<Location>(), (ArchEntity entity, ref Location location) =>
         {
-            playerMoved = true;
-            clientState.Player.Location += cameraSpeed * clientState.Camera.front.ToVector3();
-        }
-        if (_keyboard.IsKeyPressed(Key.S))
-        {
-            playerMoved = true;
-            clientState.Player.Location -= cameraSpeed * clientState.Camera.front.ToVector3();
-        }
-        if (_keyboard.IsKeyPressed(Key.A))
-        {
-            playerMoved = true;
-
-            clientState.Player.Location -= glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * cameraSpeed;
-        }
-        if (_keyboard.IsKeyPressed(Key.D))
-        {
-            clientState.Player.Location += glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * cameraSpeed;
-            playerMoved = true;
-        }
-
-        clientState.World.WorldToChunk((int)clientState.Player.Location.X, (int)clientState.Player.Location.Y, (int)clientState.Player.Location.Z, out var chunkPos, out _);
-        bool hasMovedBetweenChunks = !clientState.Player.LastFrameChunkPos.Equals(chunkPos);
-
-        if (playerMoved && clientState.NetServer != null && hasMovedBetweenChunks)
-        {
-            clientState.Profiler.Start("Requested chunks distance culling", () =>
+            bool playerMoved = false;
+            if (_keyboard.IsKeyPressed(Key.W))
             {
-                List<Vector3I> _requestedChunksCache = [.. clientState.RequestedChunksQueue];
-                foreach (var targetChunk in _requestedChunksCache)
+                playerMoved = true;
+                location.Postion += cameraSpeed * clientState.Camera.front.ToVector3();
+            }
+            if (_keyboard.IsKeyPressed(Key.S))
+            {
+                playerMoved = true;
+                location.Postion -= cameraSpeed * clientState.Camera.front.ToVector3();
+            }
+            if (_keyboard.IsKeyPressed(Key.A))
+            {
+                playerMoved = true;
+
+                location.Postion -= glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * cameraSpeed;
+            }
+            if (_keyboard.IsKeyPressed(Key.D))
+            {
+                location.Postion += glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * cameraSpeed;
+                playerMoved = true;
+            }
+
+            clientState.World.WorldToChunk((int)location.X, (int)location.Y, (int)location.Z, out var chunkPos, out _);
+            bool hasMovedBetweenChunks = !location.LastFrameChunkPos.Equals(chunkPos);
+
+            if (playerMoved && clientState.NetServer != null && hasMovedBetweenChunks)
+            {
+                clientState.Profiler.Start("Requested chunks distance culling", () =>
                 {
-                    bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.ToVector3()) > clientState.RenderDistance * 1.5;
-                    if (condition)
+                    List<Vector3I> _requestedChunksCache = [.. clientState.RequestedChunksQueue];
+                    foreach (var targetChunk in _requestedChunksCache)
                     {
-                        clientState.RequestedChunks.Remove(targetChunk);
-                        clientState.RequestedChunksQueue.Remove(targetChunk);
+                        bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.ToVector3()) > clientState.RenderDistance * 1.5;
+                        if (condition)
+                        {
+                            clientState.RequestedChunks.Remove(targetChunk);
+                            clientState.RequestedChunksQueue.Remove(targetChunk);
+                        }
                     }
-                }
-            });
+                });
 
 
-            // List<KeyValuePair<Vector3I, ChunkMesh>> _chunkMeshes = clientState.ChunkMeshes.ToList();
-            // foreach (var targetChunk in _chunkMeshes)
-            // {
-            //     bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.Key.ToVector3()) > clientState.RenderDistance * 1.5;
-            //     if (condition)
-            //     {
-            //         clientState.ChunkMeshes.Remove(targetChunk.Key);
-            //     }
-            // }
+                // List<KeyValuePair<Vector3I, ChunkMesh>> _chunkMeshes = clientState.ChunkMeshes.ToList();
+                // foreach (var targetChunk in _chunkMeshes)
+                // {
+                //     bool condition = LocationUtil.Distance(chunkPos.ToVector3(), targetChunk.Key.ToVector3()) > clientState.RenderDistance * 1.5;
+                //     if (condition)
+                //     {
+                //         clientState.ChunkMeshes.Remove(targetChunk.Key);
+                //     }
+                // }
 
-
-            clientState.Profiler.Start("Request close chunks", () =>
-            {
-                clientState.Player.LastFrameChunkPos = chunkPos;
+                location.LastFrameChunkPos = chunkPos;
 
                 foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(clientState.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
                 {
                     clientState.RequestChunk(new(x, y, z));
                 }
-            });
 
-            clientState.Profiler.Start("Send player move packet", () =>
-            {
-                clientState.NetServer.Send(PacketManager.SerializeC2SPacket(new C2SPlayerMove(clientState.Player.Location)), DeliveryMethod.ReliableUnordered);
-            });
-        }
+                clientState.NetServer.Send(PacketManager.SerializeC2SPacket(new C2SPlayerMove(location.Postion)), DeliveryMethod.ReliableUnordered);
+            }
+        });
 
         clientState.Profiler.Start("Request chunks from queue", () =>
         {

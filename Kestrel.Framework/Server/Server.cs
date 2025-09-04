@@ -25,7 +25,7 @@ public class Server
         ServerState.World = new();
         ServerState.Entities = ArchWorld.Create();
 
-        ServerState.Entities.Create(new Location(-416, 80, 383), new ModelRenderer(""));
+        ServerState.Entities.Create(new Location(ServerState.World, -416, 80, 383), new ModelRenderer(""));
 
         PacketRegistry.RegisterPackets();
 

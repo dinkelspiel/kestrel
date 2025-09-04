@@ -11,6 +11,7 @@ using LiteNetLib;
 using LiteNetLib.Utils;
 using Arch.Core;
 using Kestrel.Framework.Entity.Components;
+using Arch.Core.Extensions;
 
 namespace Kestrel.Framework.Networking.Packets.S2C;
 
@@ -55,30 +56,24 @@ public class S2CPlayerLoginSuccess : IS2CPacket
         foreach (var entity in Entities)
         {
             ArchEntity archEntity = context.Entities.Create(new ServerId(entity.Key));
+
+            // entity.Key is the server ID so we add it to the dictionary
+            context.ServerIdToEntity.TryAdd(entity.Key, archEntity);
+
             foreach (var component in entity.Value)
             {
+                if (component is Player player && player.Name == context.PlayerName)
+                {
+                    context.Player = archEntity;
+                }
                 context.Entities.Add(archEntity, component);
             }
         }
 
-        context.Player.Location = new Vector3(Position.X, Position.Y, Position.Z);
+        Location position = context.Player.Get<Location>();
 
-        context.World.WorldToChunk((int)Position.X, (int)Position.Y, (int)Position.Z, out var chunkPos, out _);
-        context.Player.LastFrameChunkPos = chunkPos;
-
-        foreach (var player in Players)
-        {
-            if (player.Name == context.Player.Name)
-            {
-                continue; // Skip self
-            }
-
-            context.Players.TryAdd(player.Name, new ClientPlayer
-            {
-                Name = player.Name,
-                Location = player.Location
-            });
-        }
+        context.World.WorldToChunk((int)position.X, (int)position.Y, (int)position.Z, out var chunkPos, out _);
+        position.LastFrameChunkPos = chunkPos;
 
         foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(context.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
         {
