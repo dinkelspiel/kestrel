@@ -1,7 +1,9 @@
 namespace Kestrel.Framework.Client.Graphics;
 
 using System.Numerics;
+using Arch.Core.Extensions;
 using GlmSharp;
+using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Utils;
 using Silk.NET.Input;
 
@@ -42,7 +44,7 @@ public class ThirdPersonCamera : Camera.Camera
         get
         {
             // point we want to look at (player “head”)
-            var target = clientState.Player.Location.ToVec3() + new vec3(0, ShoulderHeight, 0);
+            var target = clientState.Player.Get<Location>().Postion.ToVec3() + new vec3(0, ShoulderHeight, 0);
 
             // spherical orbit offset from yaw/pitch/distance
             float yawR = glm.Radians(yaw);

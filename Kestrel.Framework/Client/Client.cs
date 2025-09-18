@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Numerics;
+using Arch.Core.Extensions;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics;
 using Kestrel.Framework.Client.Graphics.Buffers;
@@ -8,6 +9,7 @@ using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Networking;
 using Kestrel.Framework.Networking.Packets;
 using Kestrel.Framework.Networking.Packets.C2S;
+using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Utils;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -18,6 +20,7 @@ using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 using ArchEntity = Arch.Core.Entity;
+using ArchWorld = Arch.Core.World;
 
 namespace Kestrel.Framework.Platform;
 
@@ -68,7 +71,8 @@ public class Client
         clientState = new(_gl, _window)
         {
             PlayerName = Environment.GetCommandLineArgs()[1],
-            World = new()
+            World = new(),
+            Entities = ArchWorld.Create()
         };
 
         for (int i = 0; i < _input.Keyboards.Count; i++)
@@ -96,7 +100,7 @@ public class Client
 
         // Networking
 
-        PacketRegistry.RegisterPackets();
+        ComponentRegistry.RegisterComponents();
 
         EventBasedNetListener listener = new();
         networkClient = new(listener);
@@ -104,8 +108,147 @@ public class Client
         networkClient.Connect("localhost" /* host IP or name */, 9050 /* port */, "SomeConnectionKey" /* text key or NetDataWriter */);
         listener.NetworkReceiveEvent += (server, dataReader, deliveryMethod, channel) =>
         {
-            IS2CPacket packet = PacketManager.DeserializeS2CPacket(dataReader);
-            PacketManager.HandleS2CPacket(packet, clientState, server);
+            var packetId = (Packet)dataReader.GetByte();
+            Console.WriteLine("Recieved network packet: {0}", packetId.ToString());
+            switch (packetId)
+            {
+                case Packet.S2CPlayerLoginSuccess:
+                    {
+                        var packet = new S2CPlayerLoginSuccess();
+                        packet.Deserialize(dataReader);
+
+                        Console.WriteLine("Found {0} Entities", packet.EntityCount);
+
+                        bool foundPlayer = false;
+                        foreach (var entity in packet.Entities)
+                        {
+                            Console.WriteLine("Parsing Entity");
+                            ArchEntity archEntity = clientState.Entities.Create(new ServerId(entity.Key));
+
+                            // entity.Key is the server ID so we add it to the dictionary
+                            clientState.ServerIdToEntity.TryAdd(entity.Key, archEntity);
+
+                            foreach (var component in entity.Value)
+                            {
+                                Console.WriteLine("Component Type: {0} {1}", component.PacketId, component.GetType());
+                                if (component is Player player && player.Name == clientState.PlayerName)
+                                {
+                                    clientState.Player = archEntity;
+                                    foundPlayer = true;
+                                }
+                                switch (component)
+                                {
+                                    case Player p: clientState.Entities.Add(archEntity, p); break;
+                                    case Location l: clientState.Entities.Add(archEntity, l); break;
+                                    case Nametag n: clientState.Entities.Add(archEntity, n); break;
+                                    case Velocity v: clientState.Entities.Add(archEntity, v); break;
+                                    default:
+                                        Console.WriteLine($"Unknown component {component.GetType().Name}");
+                                        break;
+                                }
+                            }
+                        }
+
+                        if (!foundPlayer)
+                        {
+                            Console.WriteLine("No player was sent from the server, exiting.");
+                            Environment.Exit(0);
+                            return;
+                        }
+
+                        Console.WriteLine("Player has {0} components.", clientState.Entities.GetAllComponents(clientState.Player).Length);
+
+                        clientState.status = ClientStatus.Connected;
+
+                        Location position = clientState.Player.Get<Location>();
+
+                        clientState.World.WorldToChunk((int)position.X, (int)position.Y, (int)position.Z, out var chunkPos, out _);
+                        position.LastFrameChunkPos = chunkPos;
+
+                        foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(clientState.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
+                        {
+                            clientState.RequestChunk(new(x, y, z));
+                        }
+                    }
+                    break;
+                case Packet.S2CBroadcastEntitySpawn:
+                    {
+                        var packet = new S2CBroadcastEntitySpawn();
+                        packet.Deserialize(dataReader);
+
+                        var playerServerId = clientState.Player.Get<ServerId>().Id;
+                        if (packet.ServerId == playerServerId)
+                        {
+                            return;
+                        }
+
+                        if (!clientState.ServerIdToEntity.ContainsKey(packet.ServerId))
+                        {
+                            ArchEntity archEntity = clientState.Entities.Create(new ServerId(packet.ServerId));
+
+                            // entity.Key is the server ID so we add it to the dictionary
+                            clientState.ServerIdToEntity.TryAdd(packet.ServerId, archEntity);
+
+                            foreach (var component in packet.Components)
+                            {
+                                // Should be unreachable but you never know
+                                if (component is Player player && player.Name == clientState.PlayerName)
+                                {
+                                    clientState.Player = archEntity;
+                                }
+                                clientState.Entities.Add(archEntity, component);
+                            }
+                        }
+                        else
+                        {
+                            // If the entity already exists we just ignore it for now we might want to change this later
+                            // to check for new components etc etc
+                        }
+                    }
+                    break;
+                case Packet.S2CBroadcastEntityMove:
+                    {
+                        var packet = new S2CBroadcastEntityMove();
+                        packet.Deserialize(dataReader);
+
+                        // Don't update the position of the player, might want to change this later but yeah
+                        var playerServerId = clientState.Player.Get<ServerId>().Id;
+                        if (packet.ServerId == playerServerId)
+                        {
+                            return;
+                        }
+
+                        ArchEntity entity = clientState.ServerIdToEntity[packet.ServerId];
+                        entity.Get<Location>().Postion = new Vector3(packet.Position.X, packet.Position.Y, packet.Position.Z);
+                    }
+                    break;
+                case Packet.S2CChunkResponse:
+                    {
+                        var packet = new S2CChunkResponse();
+                        packet.Deserialize(dataReader);
+
+                        foreach (var packetChunk in packet.Chunks)
+                        {
+                            var chunk = new World.Chunk(clientState.World, packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ) { Blocks = packetChunk.Blocks, IsEmpty = packetChunk.IsEmpty };
+                            clientState.World.SetChunk(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ, chunk);
+
+                            var key = new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ);
+                            clientState.ChunkMeshes.Remove(key, out var _);
+
+                            var mesh = new ChunkMesh(clientState, chunk);
+                            clientState.ChunkMeshManager.QueueGeneration(mesh);
+                            clientState.ChunkMeshes.TryAdd(key, mesh);
+
+                            if (clientState.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY + 1, packetChunk.ChunkZ), out var topMesh)) clientState.ChunkMeshManager.QueueGeneration(topMesh);
+                            if (clientState.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY - 1, packetChunk.ChunkZ), out var bottomMesh)) clientState.ChunkMeshManager.QueueGeneration(bottomMesh);
+                            if (clientState.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ + 1), out var northMesh)) clientState.ChunkMeshManager.QueueGeneration(northMesh);
+                            if (clientState.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ - 1), out var southMesh)) clientState.ChunkMeshManager.QueueGeneration(southMesh);
+                            if (clientState.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX - 1, packetChunk.ChunkY, packetChunk.ChunkZ), out var westMesh)) clientState.ChunkMeshManager.QueueGeneration(westMesh);
+                            if (clientState.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX + 1, packetChunk.ChunkY, packetChunk.ChunkZ), out var eastMesh)) clientState.ChunkMeshManager.QueueGeneration(eastMesh);
+                        }
+                    }
+                    break;
+            }
 
             dataReader.Recycle();
         };
@@ -117,13 +260,18 @@ public class Client
 
             C2SPlayerLoginRequest loginRequest = new(clientState.PlayerName);
 
-            clientState.NetServer.Send(PacketManager.SerializeC2SPacket(loginRequest), DeliveryMethod.ReliableOrdered);
+            clientState.NetServer.Send(IPacket.Serialize(loginRequest), DeliveryMethod.ReliableOrdered);
         };
     }
 
     private void OnUpdate(double deltaTime)
     {
         clientState.Profiler.Tick += 1;
+
+        networkClient.PollEvents();
+
+        if (clientState.status != ClientStatus.Connected)
+            return;
 
         var _keyboard = _input.Keyboards[0];
         float cameraSpeed = 150.0f * (float)deltaTime;
@@ -190,7 +338,7 @@ public class Client
                     clientState.RequestChunk(new(x, y, z));
                 }
 
-                clientState.NetServer.Send(PacketManager.SerializeC2SPacket(new C2SPlayerMove(location.Postion)), DeliveryMethod.ReliableUnordered);
+                clientState.NetServer.Send(IPacket.Serialize(new C2SPlayerMove(location.Postion)), DeliveryMethod.ReliableUnordered);
             }
         });
 
@@ -208,13 +356,14 @@ public class Client
         {
             clientState.ChunkMeshManager.GenerateFromQueueUnderTimeLimit(8);
         });
-
-        networkClient.PollEvents();
     }
 
     private unsafe void OnRender(double deltaTime)
     {
         _gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+        if (clientState.status != ClientStatus.Connected)
+            return;
 
         clientState.Profiler.Start("Rendering", () =>
         {

@@ -14,4 +14,10 @@ public class ServerState
     public NetManager NetServer { get; set; }
     public World.World World;
     public ArchWorld Entities;
+    public ConcurrentDictionary<Guid, ArchEntity> NetworkableEntities = [];
+
+    public void SpawnEntity()
+    {
+
+    }
 }

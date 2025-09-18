@@ -21,6 +21,12 @@ public static class ComponentManager
             component!.Deserialize(reader);
             return component;
         }
+        Console.WriteLine("Eligble Components:");
+        foreach (var _component in ComponentRegistry.Components.ToList())
+        {
+            Console.Write("{0}: {1}, ", _component.Key, _component.Value.GetType());
+        }
+        Console.WriteLine();
         throw new Exception($"Unknown component ID: {packetId}");
     }
 }

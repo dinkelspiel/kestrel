@@ -7,11 +7,11 @@ namespace Kestrel.Framework.Networking.Packets;
 
 public static class ComponentRegistry
 {
-    private static Dictionary<ushort, INetworkableComponent> components = [];
+    public static Dictionary<ushort, INetworkableComponent> Components = [];
 
     public static void RegisterComponents()
     {
-        Register(new DisplayName());
+        Register(new Nametag());
         Register(new Location());
         Register(new Player());
         Register(new Velocity());
@@ -19,16 +19,16 @@ public static class ComponentRegistry
 
     public static void Register(INetworkableComponent component)
     {
-        components.Add(component.PacketId, component);
+        Components.Add(component.PacketId, component);
     }
 
     public static bool TryGetComponent(ushort packetId, out INetworkableComponent? component)
     {
-        if (components == null)
+        if (Components == null)
         {
             throw new Exception("Components not registered. Call RegisterComponents() first.");
         }
-        if (components.TryGetValue(packetId, out var _component))
+        if (Components.TryGetValue(packetId, out var _component))
         {
             component = _component;
             return true;

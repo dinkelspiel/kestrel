@@ -17,9 +17,10 @@ public class PacketChunk
     public BlockType[] Blocks;
 }
 
-public class S2CChunkResponse : IS2CPacket
+public class S2CChunkResponse : IPacket
 {
-    public ushort PacketId => 6;
+    public Packet PacketId => Packet.S2CChunkResponse;
+
 
     public int ChunkCount;
     public PacketChunk[] Chunks;
@@ -94,31 +95,5 @@ public class S2CChunkResponse : IS2CPacket
                 }
             }
         }
-    }
-
-    public void Handle(ClientState context, NetPeer server)
-    {
-        context.Profiler.Start("Chunk Response", () =>
-        {
-            foreach (var packetChunk in Chunks)
-            {
-                var chunk = new Chunk(context.World, packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ) { Blocks = packetChunk.Blocks, IsEmpty = packetChunk.IsEmpty };
-                context.World.SetChunk(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ, chunk);
-
-                var key = new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ);
-                context.ChunkMeshes.Remove(key, out var _);
-
-                var mesh = new ChunkMesh(context, chunk);
-                context.ChunkMeshManager.QueueGeneration(mesh);
-                context.ChunkMeshes.TryAdd(key, mesh);
-
-                if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY + 1, packetChunk.ChunkZ), out var topMesh)) context.ChunkMeshManager.QueueGeneration(topMesh);
-                if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY - 1, packetChunk.ChunkZ), out var bottomMesh)) context.ChunkMeshManager.QueueGeneration(bottomMesh);
-                if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ + 1), out var northMesh)) context.ChunkMeshManager.QueueGeneration(northMesh);
-                if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX, packetChunk.ChunkY, packetChunk.ChunkZ - 1), out var southMesh)) context.ChunkMeshManager.QueueGeneration(southMesh);
-                if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX - 1, packetChunk.ChunkY, packetChunk.ChunkZ), out var westMesh)) context.ChunkMeshManager.QueueGeneration(westMesh);
-                if (context.ChunkMeshes.TryGetValue(new Vector3I(packetChunk.ChunkX + 1, packetChunk.ChunkY, packetChunk.ChunkZ), out var eastMesh)) context.ChunkMeshManager.QueueGeneration(eastMesh);
-            }
-        });
     }
 }

@@ -1,25 +1,26 @@
 using System.Numerics;
+using System.Text;
+using Arch.Core;
 using Arch.Core.Extensions;
-using GlmSharp;
 using Kestrel.Framework.Entity.Components;
+using Kestrel.Framework.Networking.Packets.S2C;
+using Kestrel.Framework.Server;
 using Kestrel.Framework.Server.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using ArchEntity = Arch.Core.Entity;
 
-namespace Kestrel.Framework.Networking.Packets.S2C;
+namespace Kestrel.Framework.Networking.Packets.C2S;
 
-public class S2CBroadcastEntityMove : IPacket
+public struct C2SPlayerMove(Vector3 location) : IPacket
 {
-    public Packet PacketId => Packet.S2CBroadcastEntityMove;
+    public readonly Packet PacketId => Packet.C2SPlayerMove;
 
-    public Guid ServerId;
-    public Vector3 Position;
+    public Vector3 Location = location;
 
     public void Deserialize(NetDataReader reader)
     {
-        ServerId = reader.GetGuid();
-        Position = new()
+        Location = new()
         {
             X = reader.GetFloat(),
             Y = reader.GetFloat(),
@@ -29,9 +30,8 @@ public class S2CBroadcastEntityMove : IPacket
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put(ServerId);
-        writer.Put(Position.X);
-        writer.Put(Position.Y);
-        writer.Put(Position.Z);
+        writer.Put(Location.X);
+        writer.Put(Location.Y);
+        writer.Put(Location.Z);
     }
 }

@@ -1,12 +1,15 @@
 using System.Numerics;
+using Arch.Core.Extensions;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics.Shaders;
+using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
 using StbImageSharp;
+using ArchEntity = Arch.Core.Entity;
 
 namespace Kestrel.Framework.Client.Graphics.Buffers;
 
@@ -101,18 +104,18 @@ public class QuadMesh
         }
 
         cube.Bind();
-        foreach (ClientPlayer player in clientState.Players.Values)
+        clientState.Entities.Query(new Arch.Core.QueryDescription().WithAll<Location>(), (ArchEntity entity, ref Location location) =>
         {
-            vec3 pos = player.Location.ToVec3();
+            vec3 pos = location.Postion.ToVec3();
             mat4 model = mat4.Identity * mat4.Translate(pos);
             fixed (float* ptr = model.Values1D)
                 clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
 
             clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-        }
+        });
 
         {
-            vec3 pos = clientState.Player.Location.ToVec3();
+            vec3 pos = clientState.Player.Get<Location>().Postion.ToVec3();
             mat4 model = mat4.Identity * mat4.Translate(pos);
             fixed (float* ptr = model.Values1D)
                 clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);

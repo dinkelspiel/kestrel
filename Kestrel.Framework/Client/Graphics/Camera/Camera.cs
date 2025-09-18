@@ -1,7 +1,9 @@
 namespace Kestrel.Framework.Client.Graphics.Camera;
 
 using System.Numerics;
+using Arch.Core.Extensions;
 using GlmSharp;
+using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Utils;
 using Silk.NET.Input;
 using Silk.NET.Vulkan;
@@ -29,7 +31,10 @@ public abstract class Camera
     {
         get
         {
-            return mat4.LookAt(clientState.Player.Location.ToVec3(), clientState.Player.Location.ToVec3() + front, up);
+            vec3 playerLocation;
+            playerLocation = clientState.Player.Get<Location>().Postion.ToVec3();
+
+            return mat4.LookAt(playerLocation, playerLocation + front, up);
         }
     }
 

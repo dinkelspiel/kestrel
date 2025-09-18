@@ -17,15 +17,25 @@ using ArchEntity = Arch.Core.Entity;
 using Kestrel.Framework.Entity.Components;
 using Arch.Core;
 using Arch.Core.Extensions;
+using Kestrel.Framework.Entity;
+
+public enum ClientStatus
+{
+    Connecting,
+    Connected,
+    Disconnected
+}
 
 public class ClientState
 {
+    public ClientStatus status = ClientStatus.Connecting;
     public Kestrel.Framework.Client.Graphics.Window Window;
     public Camera Camera;
     public ArchEntity Player;
     public string PlayerName;
     public ArchWorld Entities;
-    public ConcurrentDictionary<int, ArchEntity> ServerIdToEntity = [];
+    public ConcurrentDictionary<Guid, ArchEntity> NetworkableEntities = [];
+    public ConcurrentDictionary<Guid, ArchEntity> ServerIdToEntity = [];
     public NetPeer NetServer;
     public KestrelWorld World;
     public ConcurrentDictionary<Vector3I, ChunkMesh> ChunkMeshes = [];
@@ -76,7 +86,7 @@ public class ClientState
 
 
         int batchCount = Math.Min(8, queueSortedByDistance.Count);
-        NetServer.Send(PacketManager.SerializeC2SPacket(new C2SChunkRequest
+        NetServer.Send(IPacket.Serialize(new C2SChunkRequest
         {
             ChunkCount = batchCount,
             Chunks = [.. queueSortedByDistance.Take(batchCount)]

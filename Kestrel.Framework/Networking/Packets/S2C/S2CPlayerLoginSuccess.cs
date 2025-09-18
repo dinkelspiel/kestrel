@@ -15,18 +15,19 @@ using Arch.Core.Extensions;
 
 namespace Kestrel.Framework.Networking.Packets.S2C;
 
-public class S2CPlayerLoginSuccess : IS2CPacket
+public class S2CPlayerLoginSuccess : IPacket
 {
-    public ushort PacketId => 2;
+    public Packet PacketId => Packet.S2CPlayerLoginSuccess;
+
     public int EntityCount;
-    public Dictionary<int, INetworkableComponent[]> Entities;
+    public Dictionary<Guid, INetworkableComponent[]> Entities = [];
 
     public void Deserialize(NetDataReader reader)
     {
         EntityCount = reader.GetInt();
-        Entities = [];
         for (int i = 0; i < EntityCount; i++)
         {
+            var entityId = reader.GetGuid();
             var componentCount = reader.GetInt();
             var components = new INetworkableComponent[componentCount];
             for (int j = 0; j < componentCount; j++)
@@ -34,6 +35,7 @@ public class S2CPlayerLoginSuccess : IS2CPacket
                 INetworkableComponent component = ComponentManager.DeserializeComponent(reader);
                 components[j] = component;
             }
+            Entities.Add(entityId, components);
         }
     }
 
@@ -48,36 +50,6 @@ public class S2CPlayerLoginSuccess : IS2CPacket
             {
                 ComponentManager.SerializeComponent(component, writer);
             }
-        }
-    }
-
-    public void Handle(ClientState context, NetPeer server)
-    {
-        foreach (var entity in Entities)
-        {
-            ArchEntity archEntity = context.Entities.Create(new ServerId(entity.Key));
-
-            // entity.Key is the server ID so we add it to the dictionary
-            context.ServerIdToEntity.TryAdd(entity.Key, archEntity);
-
-            foreach (var component in entity.Value)
-            {
-                if (component is Player player && player.Name == context.PlayerName)
-                {
-                    context.Player = archEntity;
-                }
-                context.Entities.Add(archEntity, component);
-            }
-        }
-
-        Location position = context.Player.Get<Location>();
-
-        context.World.WorldToChunk((int)position.X, (int)position.Y, (int)position.Z, out var chunkPos, out _);
-        position.LastFrameChunkPos = chunkPos;
-
-        foreach (var (x, y, z) in LocationUtil.CoordsNearestFirst(context.RenderDistance, chunkPos.X, chunkPos.Y, chunkPos.Z))
-        {
-            context.RequestChunk(new(x, y, z));
         }
     }
 }

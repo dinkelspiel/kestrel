@@ -20,12 +20,7 @@ D:/Projects2025/Coding/C#/kestrel/Kestrel.Framework/obj/Debug/net8.0/ref/Kestrel
 /home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.dll
 /home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/refint/Kestrel.Framework.dll
 /home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/Kestrel.Framework.pdb
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.csproj.AssemblyReference.cache
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.GeneratedMSBuildEditorConfig.editorconfig
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.AssemblyInfoInputs.cache
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.AssemblyInfo.cs
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.csproj.CoreCompileInputs.cache
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.sourcelink.json
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.dll
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\refint\Kestrel.Framework.dll
-D:\Projects2025\Coding\C#\kestrel\Kestrel.Framework\obj\Debug\net8.0\Kestrel.Framework.pdb
+/home/keii/Coding/voxel/Kestrel.Framework/bin/Debug/net8.0/Kestrel.Framework.deps.json
+/home/keii/Coding/voxel/Kestrel.Framework/bin/Debug/net8.0/Kestrel.Framework.dll
+/home/keii/Coding/voxel/Kestrel.Framework/bin/Debug/net8.0/Kestrel.Framework.pdb
+/home/keii/Coding/voxel/Kestrel.Framework/obj/Debug/net8.0/ref/Kestrel.Framework.dll
