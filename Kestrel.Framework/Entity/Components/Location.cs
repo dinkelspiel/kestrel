@@ -36,6 +36,10 @@ public record struct Location : INetworkableComponent
         LastUpdatedY = Y;
         LastUpdatedZ = Z;
 
+        this.X = X;
+        this.Y = Y;
+        this.Z = Z;
+
         world.WorldToChunk((int)X, (int)Y, (int)Z, out Vector3I chunkPos, out _);
         LastFrameChunkPos = chunkPos;
     }
@@ -45,12 +49,14 @@ public record struct Location : INetworkableComponent
         writer.Put(X);
         writer.Put(Y);
         writer.Put(Z);
+        Console.WriteLine("Serialized X{0} Y{1} Z{2}", X, Y, Z);
     }
 
     public void Deserialize(NetDataReader reader)
     {
-        X = reader.GetInt();
-        Y = reader.GetInt();
-        Z = reader.GetInt();
+        X = reader.GetFloat();
+        Y = reader.GetFloat();
+        Z = reader.GetFloat();
+        Console.WriteLine("Deserialized X{0} Y{1} Z{2}", X, Y, Z);
     }
 };

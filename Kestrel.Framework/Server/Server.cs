@@ -75,7 +75,7 @@ public class Server
                         else
                         {
                             var guid = Guid.NewGuid();
-                            player = ServerState.Entities.Create(new ServerId(guid), new Entity.Components.Player(packet.PlayerName!), new Location(ServerState.World, -416, 80, 383), new Nametag(packet.PlayerName!), new Velocity(0, 0, 0));
+                            player = ServerState.Entities.Create(new ServerId(guid), new Entity.Components.Player(packet.PlayerName!), new Location(ServerState.World, -416, 100, 383), new Nametag(packet.PlayerName!), new Velocity(0, 0, 0));
 
                             ServerState.PlayersByName.TryAdd(packet.PlayerName!, player);
                             ServerState.PlayersByConnection.TryAdd(client, player);
