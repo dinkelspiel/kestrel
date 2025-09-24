@@ -14,6 +14,8 @@ using System.Numerics;
 using Kestrel.Framework.Networking.Packets.S2C;
 using Arch.Core.Extensions;
 using Kestrel.Framework.Entity;
+using System.Reflection.Metadata.Ecma335;
+using System.Net;
 
 namespace Kestrel.Framework.Server;
 
@@ -75,7 +77,7 @@ public class Server
                         else
                         {
                             var guid = Guid.NewGuid();
-                            player = ServerState.Entities.Create(new ServerId(guid), new Entity.Components.Player(packet.PlayerName!), new Location(ServerState.World, -416, 100, 383), new Nametag(packet.PlayerName!), new Velocity(0, 0, 0));
+                            player = ServerState.Entities.Create(new ServerId(guid), new Entity.Components.Player(packet.PlayerName!), new Location(ServerState.World, -416, 100, 383), new Nametag(packet.PlayerName!), new Velocity(0, 0, 0), new Physics());
 
                             ServerState.PlayersByName.TryAdd(packet.PlayerName!, player);
                             ServerState.PlayersByConnection.TryAdd(client, player);
@@ -86,17 +88,8 @@ public class Server
                         Console.WriteLine("Found {0} eligible entities to send.", ServerState.NetworkableEntities.Count);
                         foreach (var entity in ServerState.NetworkableEntities)
                         {
-                            List<INetworkableComponent> serializedComponents = [];
-                            var entityComponents = ServerState.Entities.GetAllComponents(entity.Value);
-
-                            foreach (var _component in entityComponents)
-                            {
-                                if (_component is INetworkableComponent component)
-                                {
-                                    serializedComponents.Add(component);
-                                }
-                            }
-                            serializedEntities.Add(entity.Key, [.. serializedComponents]);
+                            var serializedComponents = ServerState.GetNetworkableComponents(entity.Value);
+                            serializedEntities.Add(entity.Key, serializedComponents);
                         }
                         var loginSuccess = new S2CPlayerLoginSuccess
                         {
@@ -120,7 +113,33 @@ public class Server
                         }, (i) =>
                         {
                             var chunkPos = chunks[i];
-                            generatedChunks[i] = ServerState.World.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z);
+                            var chunk = ServerState.World.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z, out var generated);
+                            generatedChunks[i] = chunk;
+                            bool addedEntity = false;
+                            if (generated)
+                            {
+                                for (int lx = 0; lx < ServerState.World.ChunkSize && !addedEntity; lx++)
+                                {
+                                    for (int ly = 0; ly < ServerState.World.ChunkSize && !addedEntity; ly++)
+                                    {
+                                        for (int lz = 0; lz < ServerState.World.ChunkSize && !addedEntity; lz++)
+                                        {
+                                            var block = chunk.GetBlock(lx, ly, lz);
+                                            var below = chunk.GetBlock(lx, ly - 1, lz);
+
+                                            if (below.HasValue && block.HasValue)
+                                            {
+                                                if (below.Value == World.BlockType.Grass && block.Value == World.BlockType.Air)
+                                                {
+                                                    (int wx, int wy, int wz) = chunk.ChunkToWorld(lx, ly, lz);
+                                                    ServerState.SpawnEntity(wx, wy, wz);
+                                                    addedEntity = true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         });
 
                         client.Send(IPacket.Serialize(new S2CChunkResponse(generatedChunks)), DeliveryMethod.ReliableUnordered);
@@ -136,14 +155,14 @@ public class Server
                             Console.WriteLine($"Client not found in context.");
                             return;
                         }
-                        player.Get<Location>().Postion = packet.Location;
+                        player.Get<Location>().Position = packet.Location;
                         var playerServerId = player.Get<ServerId>().Id;
 
                         ServerState.NetServer.SendToAll(IPacket.Serialize(new S2CBroadcastEntityMove()
                         {
                             ServerId = playerServerId,
                             Position = new Vector3(packet.Location.X, packet.Location.Y, packet.Location.Z)
-                        }), DeliveryMethod.ReliableOrdered);
+                        }), DeliveryMethod.Unreliable);
                     }
                     break;
             }
@@ -152,19 +171,96 @@ public class Server
         }
                 ;
 
+        const int targetTickRate = 20;          // 20 ticks per second
+        const double tickInterval = 1000.0 / targetTickRate; // in ms
+        var stopwatch = new System.Diagnostics.Stopwatch();
+        stopwatch.Start();
+        double accumulated = 0;
 
         while (!Console.KeyAvailable)
         {
             ServerState.NetServer.PollEvents();
 
-            ServerState.Entities.Query(new QueryDescription().WithAll<Location>(), (ArchEntity entity, ref Location location) =>
-            {
-                if (LocationUtil.Distance(new(location.X, location.Y, location.Z), new(location.LastUpdatedX, location.LastUpdatedY, location.LastUpdatedZ)) > 5)
-                {
+            accumulated += stopwatch.Elapsed.TotalMilliseconds;
+            stopwatch.Restart();
 
-                }
-            });
+            while (accumulated >= tickInterval)
+            {
+                Tick();
+                accumulated -= tickInterval;
+            }
+
+            // Thread.Sleep(1);
         }
         ServerState.NetServer.Stop();
+    }
+
+    public void Tick()
+    {
+        ServerState.Entities.Query(new QueryDescription().WithAll<Velocity, Physics>(), (ArchEntity entity, ref Velocity velocity, ref Physics physics) =>
+        {
+            if (entity.Has<Player>())
+                return;
+
+            velocity.Y += Physics.GRAVITY;
+
+            // Cap y velocity
+            velocity.Y = MathF.Min(velocity.Y, 3);
+        });
+
+        ServerState.Entities.Query(new QueryDescription().WithAll<EntityAi>(), (ArchEntity entity, ref EntityAi entityAi) =>
+        {
+            var secondsSinceLastStateChange = (DateTime.Now - entityAi.LastStateChange).Milliseconds / 1000f;
+            if (entityAi.State.StateTime < secondsSinceLastStateChange)
+            {
+                var random = new Random();
+                if (random.NextDouble() < 0.5)
+                {
+                    entityAi.State = new EntityIdle();
+                }
+                else
+                {
+                    entityAi.State = new EntityWalking();
+                }
+            }
+        });
+
+        ServerState.Entities.Query(
+            new QueryDescription().WithAll<Location, Velocity, Collider>(),
+            (ArchEntity entity, ref Location location, ref Velocity velocity, ref Collider collider) =>
+        {
+            if (entity.Has<Player>())
+                return;
+
+            Vector3 startPos = location.Position;
+
+            collider.IsOnGround = false;
+
+            // TODO: Add deltatime
+            Vector3 move = velocity.Vel;
+
+            AxisResolver.MoveAxis(ServerState.World, ref location, ref velocity, ref collider, AxisResolver.Axis.Y, move.Y);
+            AxisResolver.MoveAxis(ServerState.World, ref location, ref velocity, ref collider, AxisResolver.Axis.X, move.X);
+            AxisResolver.MoveAxis(ServerState.World, ref location, ref velocity, ref collider, AxisResolver.Axis.Z, move.Z);
+
+            Vector3 displacement = location.Position - startPos;
+            float distanceMoved = displacement.Length();
+            velocity.DistanceMoved += distanceMoved;
+
+            // velocity.DistanceMoved > 1f &&
+            if (entity.Has<ServerId>())
+            {
+                var serverId = entity.Get<ServerId>();
+
+                var packet = new S2CBroadcastEntityMove
+                {
+                    ServerId = serverId.Id,
+                    Position = location.Position
+                };
+
+                velocity.DistanceMoved = 0f;
+                ServerState.NetServer.SendToAll(IPacket.Serialize(packet), DeliveryMethod.Unreliable);
+            }
+        });
     }
 }

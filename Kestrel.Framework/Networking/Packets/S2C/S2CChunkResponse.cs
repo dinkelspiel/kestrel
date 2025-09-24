@@ -1,7 +1,6 @@
 using System.Numerics;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics.Buffers;
-using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using LiteNetLib;

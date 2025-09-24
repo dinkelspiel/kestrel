@@ -2,7 +2,6 @@ using System.Numerics;
 using Arch.Core.Extensions;
 using GlmSharp;
 using Kestrel.Framework.Entity.Components;
-using Kestrel.Framework.Server.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using ArchEntity = Arch.Core.Entity;

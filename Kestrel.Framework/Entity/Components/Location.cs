@@ -9,20 +9,11 @@ public record struct Location : INetworkableComponent
 {
     public readonly ushort PacketId => 1;
 
-    public Vector3 Postion
-    {
-        get => new(X, Y, Z);
-        set
-        {
-            X = value.X;
-            Y = value.Y;
-            Z = value.Z;
-        }
-    }
+    public Vector3 Position = new();
 
-    public float X;
-    public float Y;
-    public float Z;
+    public float X { readonly get { return Position.X; } set { Position.X = value; } }
+    public float Y { readonly get { return Position.Y; } set { Position.Y = value; } }
+    public float Z { readonly get { return Position.Z; } set { Position.Z = value; } }
 
     public float LastUpdatedX;
     public float LastUpdatedY;
@@ -49,7 +40,6 @@ public record struct Location : INetworkableComponent
         writer.Put(X);
         writer.Put(Y);
         writer.Put(Z);
-        Console.WriteLine("Serialized X{0} Y{1} Z{2}", X, Y, Z);
     }
 
     public void Deserialize(NetDataReader reader)
@@ -57,6 +47,5 @@ public record struct Location : INetworkableComponent
         X = reader.GetFloat();
         Y = reader.GetFloat();
         Z = reader.GetFloat();
-        Console.WriteLine("Deserialized X{0} Y{1} Z{2}", X, Y, Z);
     }
 };

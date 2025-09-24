@@ -44,7 +44,7 @@ public class ThirdPersonCamera : Camera.Camera
         get
         {
             // point we want to look at (player “head”)
-            var target = clientState.Player.Get<Location>().Postion.ToVec3() + new vec3(0, ShoulderHeight, 0);
+            var target = clientState.Player.Get<Location>().Position.ToVec3() + new vec3(0, ShoulderHeight, 0);
 
             // spherical orbit offset from yaw/pitch/distance
             float yawR = glm.Radians(yaw);

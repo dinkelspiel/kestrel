@@ -32,7 +32,7 @@ public abstract class Camera
         get
         {
             vec3 playerLocation;
-            playerLocation = clientState.Player.Get<Location>().Postion.ToVec3();
+            playerLocation = clientState.Player.Get<Location>().Position.ToVec3();
 
             return mat4.LookAt(playerLocation, playerLocation + front, up);
         }

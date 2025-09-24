@@ -6,7 +6,6 @@ using Kestrel.Framework.Client.Graphics.Buffers;
 using Kestrel.Framework.Client.Graphics.Camera;
 using Kestrel.Framework.Networking.Packets;
 using Kestrel.Framework.Networking.Packets.C2S;
-using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
 using KestrelWorld = Kestrel.Framework.World.World;
 using LiteNetLib;

@@ -2,7 +2,6 @@ using System.Numerics;
 using System.Text;
 using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Server;
-using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using LiteNetLib;

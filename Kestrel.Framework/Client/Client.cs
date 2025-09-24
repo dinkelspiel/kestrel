@@ -92,11 +92,11 @@ public class Client
         _gl.Enable(EnableCap.DepthTest);
         _gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         // _gl.PolygonMode(GLEnum.FrontAndBack, GLEnum.Line);
-        clientState.Window.GL.Enable(GLEnum.CullFace);
-        clientState.Window.GL.CullFace(GLEnum.Back);
+        // clientState.Window.GL.Enable(GLEnum.CullFace);
+        // clientState.Window.GL.CullFace(GLEnum.Back);
 
         // Tell GL which triangle winding is considered "front"
-        clientState.Window.GL.FrontFace(GLEnum.Ccw);
+        // clientState.Window.GL.FrontFace(GLEnum.Ccw);
 
         // Networking
 
@@ -179,11 +179,13 @@ public class Client
                         var playerServerId = clientState.Player.Get<ServerId>().Id;
                         if (packet.ServerId == playerServerId)
                         {
+                            Console.WriteLine("Ignoring player spawn");
                             return;
                         }
 
                         if (!clientState.ServerIdToEntity.ContainsKey(packet.ServerId))
                         {
+                            Console.WriteLine("adding entity");
                             ArchEntity archEntity = clientState.Entities.Create(new ServerId(packet.ServerId));
 
                             // entity.Key is the server ID so we add it to the dictionary
@@ -196,11 +198,21 @@ public class Client
                                 {
                                     clientState.Player = archEntity;
                                 }
-                                clientState.Entities.Add(archEntity, component);
+
+                                switch (component)
+                                {
+                                    case Location location: clientState.Entities.Add(archEntity, location); break;
+                                    case Nametag nametag: clientState.Entities.Add(archEntity, nametag); break;
+                                    case Player playerC: clientState.Entities.Add(archEntity, playerC); break;
+                                    case Velocity velocity: clientState.Entities.Add(archEntity, velocity); break;
+                                    case Physics physics: clientState.Entities.Add(archEntity, physics); break;
+                                    case Collider collider: clientState.Entities.Add(archEntity, collider); break;
+                                }
                             }
                         }
                         else
                         {
+                            Console.WriteLine("Entity already exists");
                             // If the entity already exists we just ignore it for now we might want to change this later
                             // to check for new components etc etc
                         }
@@ -219,7 +231,7 @@ public class Client
                         }
 
                         ArchEntity entity = clientState.ServerIdToEntity[packet.ServerId];
-                        entity.Get<Location>().Postion = new Vector3(packet.Position.X, packet.Position.Y, packet.Position.Z);
+                        entity.Get<Location>().Position = new Vector3(packet.Position.X, packet.Position.Y, packet.Position.Z);
                     }
                     break;
                 case Packet.S2CChunkResponse:
@@ -276,28 +288,36 @@ public class Client
         var _keyboard = _input.Keyboards[0];
         float cameraSpeed = 150.0f * (float)deltaTime;
 
-        clientState.Entities.Query(new Arch.Core.QueryDescription().WithAll<Location>(), (ArchEntity entity, ref Location location) =>
+        clientState.Entities.Query(new Arch.Core.QueryDescription().WithAll<Location, Player>(), (ArchEntity entity, ref Location location, ref Player player) =>
         {
+            if (player.Name != clientState.PlayerName)
+                return;
+
             bool playerMoved = false;
+
+            var actualCameraSpeed = cameraSpeed;
+            if (_keyboard.IsKeyPressed(Key.ShiftLeft))
+                actualCameraSpeed *= 0.2f;
+
             if (_keyboard.IsKeyPressed(Key.W))
             {
                 playerMoved = true;
-                location.Postion += cameraSpeed * clientState.Camera.front.ToVector3();
+                location.Position += actualCameraSpeed * clientState.Camera.front.ToVector3();
             }
             if (_keyboard.IsKeyPressed(Key.S))
             {
                 playerMoved = true;
-                location.Postion -= cameraSpeed * clientState.Camera.front.ToVector3();
+                location.Position -= actualCameraSpeed * clientState.Camera.front.ToVector3();
             }
             if (_keyboard.IsKeyPressed(Key.A))
             {
                 playerMoved = true;
 
-                location.Postion -= glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * cameraSpeed;
+                location.Position -= glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * actualCameraSpeed;
             }
             if (_keyboard.IsKeyPressed(Key.D))
             {
-                location.Postion += glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * cameraSpeed;
+                location.Position += glm.Normalized(glm.Cross(clientState.Camera.front, clientState.Camera.up)).ToVector3() * actualCameraSpeed;
                 playerMoved = true;
             }
 
@@ -338,7 +358,8 @@ public class Client
                     clientState.RequestChunk(new(x, y, z));
                 }
 
-                clientState.NetServer.Send(IPacket.Serialize(new C2SPlayerMove(location.Postion)), DeliveryMethod.ReliableUnordered);
+                Console.WriteLine("Sending player move packet");
+                clientState.NetServer.Send(IPacket.Serialize(new C2SPlayerMove(location.Position)), DeliveryMethod.ReliableUnordered);
             }
         });
 

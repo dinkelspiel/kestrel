@@ -17,17 +17,19 @@ public sealed class World
         Generator = new(this);
     }
 
-    public Chunk GetChunkOrGenerate(int cx, int cy, int cz)
+    public Chunk GetChunkOrGenerate(int cx, int cy, int cz, out bool generated)
     {
         Vector3I chunkPos = new(cx, cy, cz);
         if (_chunks.TryGetValue(chunkPos, out var chunk))
         {
+            generated = false;
             return chunk;
         }
 
         Chunk newChunk = new(this, cx, cy, cz);
         newChunk.Generate();
         _chunks.TryAdd(chunkPos, newChunk);
+        generated = true;
         return newChunk;
     }
 
@@ -58,6 +60,16 @@ public sealed class World
 
     public void SetChunk(int cx, int cy, int cz, Chunk chunk) =>
         _chunks[new Vector3I(cx, cy, cz)] = chunk;
+
+    public BlockType? GetBlock(int wx, int wy, int wz)
+    {
+        WorldToChunk(wx, wy, wz, out var chunkPos, out var localPos);
+        var chunk = GetChunk(chunkPos.X, chunkPos.Y, chunkPos.Z);
+        if (chunk == null)
+            return null;
+
+        return chunk.GetBlock(localPos.lx, localPos.ly, localPos.lz);
+    }
 
     public static void WorldToChunk(int wx, int wy, int wz, int chunkSize,
                                    out Vector3I cpos, out (int lx, int ly, int lz) local)

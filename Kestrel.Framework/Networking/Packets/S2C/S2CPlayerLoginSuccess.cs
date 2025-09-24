@@ -4,7 +4,6 @@ using ArchEntity = Arch.Core.Entity;
 using GlmSharp;
 using Kestrel.Framework.Entity;
 using Kestrel.Framework.Networking.Packets.C2S;
-using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using LiteNetLib;

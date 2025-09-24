@@ -9,3 +9,9 @@ public enum BlockType
     Water = 4,
     Leaves = 5
 }
+
+public static class BlockTypeExtensions
+{
+    public static bool IsSolid(this BlockType? blockType) => blockType != BlockType.Air;
+    public static bool IsSolid(this BlockType blockType) => blockType != BlockType.Air;
+}

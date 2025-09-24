@@ -34,15 +34,15 @@ public class Chunk
         });
     }
 
-    public BlockType? GetBlock(int x, int y, int z)
+    public BlockType? GetBlock(int lx, int ly, int lz)
     {
-        if (x < 0 || x >= World.ChunkSize ||
-            y < 0 || y >= World.ChunkSize ||
-            z < 0 || z >= World.ChunkSize)
+        if (lx < 0 || lx >= World.ChunkSize ||
+            ly < 0 || ly >= World.ChunkSize ||
+            lz < 0 || lz >= World.ChunkSize)
         {
             return null;
         }
-        return Blocks[ChunkToIndex(x, y, z)];
+        return Blocks[ChunkToIndex(lx, ly, lz)];
     }
 
     public void SetBlock(int lx, int ly, int lz, BlockType block)

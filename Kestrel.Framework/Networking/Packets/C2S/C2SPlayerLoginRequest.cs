@@ -5,7 +5,6 @@ using Kestrel.Framework.Entity;
 using Kestrel.Framework.Entity.Components;
 using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Server;
-using Kestrel.Framework.Server.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using ArchEntity = Arch.Core.Entity;

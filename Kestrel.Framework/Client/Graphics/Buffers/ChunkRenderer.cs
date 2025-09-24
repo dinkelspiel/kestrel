@@ -3,7 +3,6 @@ using Arch.Core.Extensions;
 using GlmSharp;
 using Kestrel.Framework.Client.Graphics.Shaders;
 using Kestrel.Framework.Entity.Components;
-using Kestrel.Framework.Server.Player;
 using Kestrel.Framework.Utils;
 using Kestrel.Framework.World;
 using Silk.NET.Maths;
@@ -104,9 +103,14 @@ public class QuadMesh
         }
 
         cube.Bind();
+        // Console.WriteLine("Before");
         clientState.Entities.Query(new Arch.Core.QueryDescription().WithAll<Location>(), (ArchEntity entity, ref Location location) =>
         {
-            vec3 pos = location.Postion.ToVec3();
+            vec3 pos = location.Position.ToVec3();
+            if (entity.Has<Player>() && entity.Get<Player>().Name == clientState.PlayerName)
+            {
+                return;
+            }
             mat4 model = mat4.Identity * mat4.Translate(pos);
             fixed (float* ptr = model.Values1D)
                 clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
@@ -114,13 +118,13 @@ public class QuadMesh
             clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
         });
 
-        {
-            vec3 pos = clientState.Player.Get<Location>().Postion.ToVec3();
-            mat4 model = mat4.Identity * mat4.Translate(pos);
-            fixed (float* ptr = model.Values1D)
-                clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
+        // {
+        //     vec3 pos = clientState.Player.Get<Location>().Postion.ToVec3();
+        //     mat4 model = mat4.Identity * mat4.Translate(pos);
+        //     fixed (float* ptr = model.Values1D)
+        //         clientState.Window.GL.UniformMatrix4(_shader.GetUniformLocation("model"), 1, false, ptr);
 
-            clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
-        }
+        //     clientState.Window.GL.DrawArrays(PrimitiveType.Triangles, 0, 36);
+        // }
     }
 }

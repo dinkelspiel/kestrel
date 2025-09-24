@@ -15,6 +15,8 @@ public static class ComponentRegistry
         Register(new Location());
         Register(new Player());
         Register(new Velocity());
+        Register(new Physics());
+        Register(new Collider());
     }
 
     public static void Register(INetworkableComponent component)
