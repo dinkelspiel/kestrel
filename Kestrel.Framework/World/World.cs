@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using ArchWorld = Arch.Core.World;
 using Kestrel.Framework.Utils;
+using System.Numerics;
 
 namespace Kestrel.Framework.World;
 
@@ -28,6 +29,11 @@ public sealed class World
 
         Chunk newChunk = new(this, cx, cy, cz);
         newChunk.Generate();
+        Random random = new();
+        if (random.NextDouble() < 0.2)
+        {
+            
+        }
         _chunks.TryAdd(chunkPos, newChunk);
         generated = true;
         return newChunk;

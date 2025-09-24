@@ -16,6 +16,7 @@ using Arch.Core.Extensions;
 using Kestrel.Framework.Entity;
 using System.Reflection.Metadata.Ecma335;
 using System.Net;
+using Kestrel.Framework.World;
 
 namespace Kestrel.Framework.Server;
 
@@ -115,31 +116,6 @@ public class Server
                             var chunkPos = chunks[i];
                             var chunk = ServerState.World.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z, out var generated);
                             generatedChunks[i] = chunk;
-                            bool addedEntity = false;
-                            if (generated)
-                            {
-                                for (int lx = 0; lx < ServerState.World.ChunkSize && !addedEntity; lx++)
-                                {
-                                    for (int ly = 0; ly < ServerState.World.ChunkSize && !addedEntity; ly++)
-                                    {
-                                        for (int lz = 0; lz < ServerState.World.ChunkSize && !addedEntity; lz++)
-                                        {
-                                            var block = chunk.GetBlock(lx, ly, lz);
-                                            var below = chunk.GetBlock(lx, ly - 1, lz);
-
-                                            if (below.HasValue && block.HasValue)
-                                            {
-                                                if (below.Value == World.BlockType.Grass && block.Value == World.BlockType.Air)
-                                                {
-                                                    (int wx, int wy, int wz) = chunk.ChunkToWorld(lx, ly, lz);
-                                                    ServerState.SpawnEntity(wx, wy, wz);
-                                                    addedEntity = true;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         });
 
                         client.Send(IPacket.Serialize(new S2CChunkResponse(generatedChunks)), DeliveryMethod.ReliableUnordered);
@@ -208,7 +184,7 @@ public class Server
             velocity.Y = MathF.Min(velocity.Y, 3);
         });
 
-        ServerState.Entities.Query(new QueryDescription().WithAll<EntityAi>(), (ArchEntity entity, ref EntityAi entityAi) =>
+        ServerState.Entities.Query(new QueryDescription().WithAll<EntityAi, Location>(), (ArchEntity entity, ref EntityAi entityAi, ref Location location) =>
         {
             var secondsSinceLastStateChange = (DateTime.Now - entityAi.LastStateChange).Milliseconds / 1000f;
             if (entityAi.State.StateTime < secondsSinceLastStateChange)
@@ -220,7 +196,30 @@ public class Server
                 }
                 else
                 {
-                    entityAi.State = new EntityWalking();
+                    List<Vector3> eligbleLocations = [];
+                    for (int wx = (int)location.X - 8; wx < (int)location.X + 8; wx++)
+                    {
+                        for (int wy = (int)location.Y - 8; wy < (int)location.Y + 8; wy++)
+                        {
+                            for (int wz = (int)location.Z - 8; wz < (int)location.Z + 8; wz++)
+                            {
+
+                                BlockType? block = ServerState.World.GetBlock(wx, wy, wz);
+                                BlockType? blockAbove = ServerState.World.GetBlock(wx, wy + 1, wz);
+                                BlockType? blockAbove2 = ServerState.World.GetBlock(wx, wy + 2, wz);
+                                if (!block.HasValue || !blockAbove.HasValue || !blockAbove2.HasValue)
+                                    continue;
+
+                                if (block.Value.IsSolid() && blockAbove == BlockType.Air && blockAbove2 == BlockType.Air)
+                                    eligbleLocations.Add(new(wx, wy, wz));
+
+                            }
+                        }
+                    }
+                    if (eligbleLocations.Count == 0)
+                        entityAi.State = new EntityIdle();
+                    else
+                        entityAi.State = new EntityWalking(eligbleLocations[random.Next(0, eligbleLocations.Count)]);
                 }
             }
         });
@@ -247,8 +246,8 @@ public class Server
             float distanceMoved = displacement.Length();
             velocity.DistanceMoved += distanceMoved;
 
-            // velocity.DistanceMoved > 1f &&
-            if (entity.Has<ServerId>())
+
+            if (velocity.DistanceMoved > 1f && entity.Has<ServerId>())
             {
                 var serverId = entity.Get<ServerId>();
 
