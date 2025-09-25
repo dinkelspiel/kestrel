@@ -8,7 +8,7 @@ public class Generator
     readonly FastNoiseLite fnl1, fnl2, mountainness, ncliffness, nelevation, worley, nvariance;
     readonly World world;
     readonly ConcurrentDictionary<(int x, int y, int z), BlockType> structureBlockStore = new();
-    readonly HashSet<(int x, int y, int z)> structures = new();
+    readonly HashSet<(int x, int y, int z)> structures = [];
 
     public Generator(World world)
     {

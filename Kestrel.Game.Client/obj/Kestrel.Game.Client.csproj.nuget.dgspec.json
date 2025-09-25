@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Game.Client\\Kestrel.Game.Client.csproj": {}
+    "/home/keii/Coding/voxel/Kestrel.Game.Client/Kestrel.Game.Client.csproj": {}
   },
   "projects": {
-    "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\Kestrel.Framework.csproj": {
+    "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\Kestrel.Framework.csproj",
+        "projectUniqueName": "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj",
         "projectName": "Kestrel.Framework",
-        "projectPath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\Kestrel.Framework.csproj",
-        "packagesPath": "C:\\Users\\wille\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\obj\\",
+        "projectPath": "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj",
+        "packagesPath": "/home/keii/.nuget/packages/",
+        "outputPath": "/home/keii/Coding/voxel/Kestrel.Framework/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\wille\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/keii/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -42,7 +36,7 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
+          "auditMode": "direct"
         },
         "SdkAnalysisLevel": "9.0.100"
       },
@@ -86,45 +80,45 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.19, 8.0.19]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/9.0.109/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Game.Client\\Kestrel.Game.Client.csproj": {
+    "/home/keii/Coding/voxel/Kestrel.Game.Client/Kestrel.Game.Client.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Game.Client\\Kestrel.Game.Client.csproj",
+        "projectUniqueName": "/home/keii/Coding/voxel/Kestrel.Game.Client/Kestrel.Game.Client.csproj",
         "projectName": "Kestrel.Game.Client",
-        "projectPath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Game.Client\\Kestrel.Game.Client.csproj",
-        "packagesPath": "C:\\Users\\wille\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Game.Client\\obj\\",
+        "projectPath": "/home/keii/Coding/voxel/Kestrel.Game.Client/Kestrel.Game.Client.csproj",
+        "packagesPath": "/home/keii/.nuget/packages/",
+        "outputPath": "/home/keii/Coding/voxel/Kestrel.Game.Client/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\wille\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/keii/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\Kestrel.Framework.csproj": {
-                "projectPath": "D:\\Projects2025\\Coding\\C#\\kestrel\\Kestrel.Framework\\Kestrel.Framework.csproj"
+              "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj": {
+                "projectPath": "/home/keii/Coding/voxel/Kestrel.Framework/Kestrel.Framework.csproj"
               }
             }
           }
@@ -137,7 +131,7 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
+          "auditMode": "direct"
         },
         "SdkAnalysisLevel": "9.0.100"
       },
@@ -152,7 +146,7 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.11, )",
+              "version": "[8.0.19, )",
               "autoReferenced": true
             }
           },
@@ -167,12 +161,22 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.19, 8.0.19]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.linux-x64",
+              "version": "[8.0.19, 8.0.19]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/9.0.109/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

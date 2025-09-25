@@ -9,6 +9,7 @@ using Kestrel.Framework.Networking.Packets.S2C;
 using Kestrel.Framework.Entity;
 using System.Net;
 using Kestrel.Framework.Networking.Packets;
+using Kestrel.Framework.Utils;
 
 namespace Kestrel.Framework.Server;
 
@@ -16,9 +17,10 @@ public class ServerState
 {
     public ConcurrentDictionary<string, ArchEntity> PlayersByName = [];
     public ConcurrentDictionary<NetPeer, ArchEntity> PlayersByConnection = [];
-    public NetManager NetServer { get; set; }
-    public World.World World;
-    public ArchWorld Entities;
+    public required NetManager NetServer { get; set; }
+    public required World.World World;
+    public required ArchWorld Entities;
+    public required EntitySpawner EntitySpawner;
     public ConcurrentDictionary<Guid, ArchEntity> NetworkableEntities = [];
 
     public INetworkableComponent[] GetNetworkableComponents(ArchEntity entity)
@@ -37,17 +39,26 @@ public class ServerState
         return [.. serializedComponents];
     }
 
-    public void SpawnEntity(int x, int y, int z)
+    public Chunk GetChunkOrGenerate(int cx, int cy, int cz, out bool generated)
     {
-        var guid = Guid.NewGuid();
-        ArchEntity entity = Entities.Create(new ServerId(guid), new Location(World, x, y + 20, z), new Velocity(0, 0, 0), new Physics(), new Collider(), new EntityAi(new EntityIdle()));
-        NetworkableEntities.TryAdd(guid, entity);
-
-        var spawnPacket = new S2CBroadcastEntitySpawn
+        Vector3I chunkPos = new(cx, cy, cz);
+        if (World.Chunks.TryGetValue(chunkPos, out var chunk))
         {
-            ServerId = guid,
-            Components = GetNetworkableComponents(entity)
-        };
-        NetServer.SendToAll(IPacket.Serialize(spawnPacket), DeliveryMethod.Unreliable);
+            generated = false;
+            return chunk;
+        }
+
+        Chunk newChunk = new(World, cx, cy, cz);
+        newChunk.Generate();
+        Random random = new();
+        if (random.NextDouble() < 0.2)
+        {
+            Console.WriteLine("Spawning entities in chunk {0},{1},{2}", cx, cy, cz);
+            EntitySpawner.SpawnEntities(newChunk);
+        }
+
+        World.Chunks.TryAdd(chunkPos, newChunk);
+        generated = true;
+        return newChunk;
     }
 }

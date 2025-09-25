@@ -22,16 +22,27 @@ namespace Kestrel.Framework.Server;
 
 public class Server
 {
-    public ServerState ServerState { get; private set; } = new();
+    public ServerState ServerState { get; private set; }
+    readonly EventBasedNetListener listener;
+
+    public Server()
+    {
+        listener = new();
+
+        ServerState = new()
+        {
+            NetServer = new(listener),
+            World = new(),
+            Entities = ArchWorld.Create(),
+            EntitySpawner = null!
+        };
+
+        ServerState.EntitySpawner = new(ServerState);
+    }
 
     public void Run()
     {
-        EventBasedNetListener listener = new();
-        ServerState.NetServer = new(listener);
-        ServerState.NetServer.Start(9050 /* port */);
-
-        ServerState.World = new();
-        ServerState.Entities = ArchWorld.Create();
+        ServerState.NetServer.Start(9050);
 
         ServerState.Entities.Create(new Location(ServerState.World, -416, 80, 383), new ModelRenderer(""));
 
@@ -54,7 +65,7 @@ public class Server
         listener.NetworkReceiveEvent += (client, dataReader, deliveryMethod, channel) =>
         {
             var packetId = (Packet)dataReader.GetByte();
-            Console.WriteLine("Recieved network packet: {0}", packetId.ToString());
+            // Console.WriteLine("Recieved network packet: {0}", packetId.ToString());
             switch (packetId)
             {
                 case Packet.C2SPlayerLoginRequest:
@@ -114,7 +125,7 @@ public class Server
                         }, (i) =>
                         {
                             var chunkPos = chunks[i];
-                            var chunk = ServerState.World.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z, out var generated);
+                            var chunk = ServerState.GetChunkOrGenerate(chunkPos.X, chunkPos.Y, chunkPos.Z, out var generated);
                             generatedChunks[i] = chunk;
                         });
 

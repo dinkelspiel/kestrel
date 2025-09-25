@@ -8,35 +8,12 @@ namespace Kestrel.Framework.World;
 public sealed class World
 {
     public readonly int ChunkSize = 32;
-    private readonly ConcurrentDictionary<Vector3I, Chunk> _chunks = new();
+    public readonly ConcurrentDictionary<Vector3I, Chunk> Chunks = new();
     public Generator Generator;
-    public ArchWorld Entities;
 
     public World()
     {
-        Entities = ArchWorld.Create();
         Generator = new(this);
-    }
-
-    public Chunk GetChunkOrGenerate(int cx, int cy, int cz, out bool generated)
-    {
-        Vector3I chunkPos = new(cx, cy, cz);
-        if (_chunks.TryGetValue(chunkPos, out var chunk))
-        {
-            generated = false;
-            return chunk;
-        }
-
-        Chunk newChunk = new(this, cx, cy, cz);
-        newChunk.Generate();
-        Random random = new();
-        if (random.NextDouble() < 0.2)
-        {
-            
-        }
-        _chunks.TryAdd(chunkPos, newChunk);
-        generated = true;
-        return newChunk;
     }
 
     public bool LocationIsLoaded(int wx, int wy, int wz, out Chunk chunk)
@@ -57,7 +34,7 @@ public sealed class World
     public Chunk? GetChunk(int cx, int cy, int cz)
     {
         Vector3I chunkPos = new(cx, cy, cz);
-        if (_chunks.TryGetValue(chunkPos, out var chunk))
+        if (Chunks.TryGetValue(chunkPos, out var chunk))
         {
             return chunk;
         }
@@ -65,7 +42,7 @@ public sealed class World
     }
 
     public void SetChunk(int cx, int cy, int cz, Chunk chunk) =>
-        _chunks[new Vector3I(cx, cy, cz)] = chunk;
+        Chunks[new Vector3I(cx, cy, cz)] = chunk;
 
     public BlockType? GetBlock(int wx, int wy, int wz)
     {
