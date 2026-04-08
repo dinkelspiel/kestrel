@@ -1,0 +1,15 @@
+{
+  "C# Class File": {
+    "scope": "csharp",
+    "prefix": "##",
+    "body": [
+      "namespace ${RELATIVE_FILEPATH/\\/([^\\/]+)$|(\\/)/${2:+.}/g};",
+      "",
+      "public class ${TM_FILENAME_BASE}",
+      "{",
+      "    $0",
+      "}"
+    ],
+    "description": "New C# class with namespace derived from file path"
+  }
+}

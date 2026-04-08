@@ -3,42 +3,32 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kestrel.Framework", "Kestrel.Framework\Kestrel.Framework.csproj", "{8FFFB75B-891D-4DC4-91E8-8A72A3027FD9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kestrel.Game.Client", "Kestrel.Game.Client\Kestrel.Game.Client.csproj", "{F1E71740-1534-4AA5-A3FF-9E5B547EDC13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kestrel.Game", "Kestrel.Game\Kestrel.Game.csproj", "{6BFA1025-46F0-4AB0-9A46-039EB5B56556}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kestrel.Game.Server", "Kestrel.Game.Server\Kestrel.Game.Server.csproj", "{593514E4-C0CB-453C-91A6-D28CD7C02535}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kestrel.Client", "Kestrel.Client\Kestrel.Client.csproj", "{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Debug|x64.Build.0 = Debug|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Debug|x86.Build.0 = Debug|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Release|x64.ActiveCfg = Release|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Release|x64.Build.0 = Release|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Release|x86.ActiveCfg = Release|Any CPU
+		{A316BA0B-F9F1-49BC-AD68-F737DE3B45ED}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8FFFB75B-891D-4DC4-91E8-8A72A3027FD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8FFFB75B-891D-4DC4-91E8-8A72A3027FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8FFFB75B-891D-4DC4-91E8-8A72A3027FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8FFFB75B-891D-4DC4-91E8-8A72A3027FD9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E67F3D0C-AD89-4B61-A920-2AE805F40CE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E67F3D0C-AD89-4B61-A920-2AE805F40CE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E67F3D0C-AD89-4B61-A920-2AE805F40CE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E67F3D0C-AD89-4B61-A920-2AE805F40CE0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F1E71740-1534-4AA5-A3FF-9E5B547EDC13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F1E71740-1534-4AA5-A3FF-9E5B547EDC13}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F1E71740-1534-4AA5-A3FF-9E5B547EDC13}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F1E71740-1534-4AA5-A3FF-9E5B547EDC13}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6BFA1025-46F0-4AB0-9A46-039EB5B56556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6BFA1025-46F0-4AB0-9A46-039EB5B56556}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6BFA1025-46F0-4AB0-9A46-039EB5B56556}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6BFA1025-46F0-4AB0-9A46-039EB5B56556}.Release|Any CPU.Build.0 = Release|Any CPU
-		{593514E4-C0CB-453C-91A6-D28CD7C02535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{593514E4-C0CB-453C-91A6-D28CD7C02535}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{593514E4-C0CB-453C-91A6-D28CD7C02535}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{593514E4-C0CB-453C-91A6-D28CD7C02535}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
