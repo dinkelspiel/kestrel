@@ -2,12 +2,10 @@ version=1
 
 # This file caches language service data to improve the performance of C# Dev Kit.
 # It is not intended for manual editing. It can safely be deleted and will be
-# regenerated automatically.
+# regenerated automatically. For more information, see https://aka.ms/lscache
 #
-# To exclude from version control, add *.lscache to your .gitignore file.
-#
-# To disable caching, add the following to your VS Code settings:
-#   "dotnet.projectsystem.enableLanguageServiceCache": false
+# To control where cache files are stored, use the following VS Code setting:
+#   "dotnet.projectsystem.cacheInProjectFolder": true
 
 [project]
 language=C#
@@ -23,7 +21,7 @@ ProjectAssetsFile=<PATH>obj/project.assets.json
 RootNamespace=Kestrel.Client
 RunAnalyzers=
 RunAnalyzersDuringLiveAnalysis=
-SolutionPath=<PATH>../Kestrel.sln
+SolutionPath=*Undefined*
 TargetFrameworkIdentifier=.NETCoreApp
 TargetPath=<PATH>bin/Debug/net10.0/Kestrel.Client.dll
 TargetRefPath=<PATH>obj/Debug/net10.0/ref/Kestrel.Client.dll
@@ -57,12 +55,17 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 
 [sourceFiles]
 ClientContext.cs
+ECS/Components.cs
+Input/Input.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  Kestrel.Client.AssemblyInfo.cs
  Kestrel.Client.GlobalUsings.g.cs
 Program.cs
 Renderer/
+ Atlas.cs
+ Camera.cs
+ RenderPass.cs
  Shader.cs
  Texture.cs
 Scene/
@@ -73,7 +76,7 @@ Scenes/
  MainMenuScene.cs
 
 [metadataReferences]
-../../../../../../../usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/10.0.4/ref/net10.0/
+<DOTNET>/packs/Microsoft.NETCore.App.Ref/10.0.4/ref/net10.0/
  Microsoft.CSharp.dll
  Microsoft.VisualBasic.Core.dll
  Microsoft.VisualBasic.dll
@@ -242,9 +245,14 @@ Scenes/
  System.Xml.XPath.XDocument.dll
  WindowsBase.dll
 <NUGET>/
+ arch.lowlevel/1.1.5/lib/net7.0/Arch.LowLevel.dll
+ arch/2.1.0/lib/net8.0/Arch.dll
+ collections.pooled/2.0.0-preview.27/lib/netcoreapp3.0/Collections.Pooled.dll
+ communitytoolkit.highperformance/8.2.2/lib/net7.0/CommunityToolkit.HighPerformance.dll
  imgui.net/1.90.8.1/lib/net6.0/ImGui.NET.dll
  microsoft.dotnet.platformabstractions/3.1.6/lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.dll
  microsoft.extensions.dependencymodel/9.0.9/lib/net9.0/Microsoft.Extensions.DependencyModel.dll
+ microsoft.extensions.objectpool/7.0.0/lib/net7.0/Microsoft.Extensions.ObjectPool.dll
  silk.net.core/2.23.0/lib/net6.0/Silk.NET.Core.dll
  silk.net.glfw/2.23.0/lib/net5.0/Silk.NET.GLFW.dll
  silk.net.input.common/2.23.0/lib/net5.0/Silk.NET.Input.Common.dll
@@ -256,19 +264,20 @@ Scenes/
  silk.net.windowing.common/2.23.0/lib/netstandard2.1/Silk.NET.Windowing.Common.dll
  silk.net.windowing.glfw/2.23.0/lib/net5.0/Silk.NET.Windowing.Glfw.dll
  stbimagesharp/2.30.15/lib/netstandard2.0/StbImageSharp.dll
+ zeroallocjobscheduler/1.1.2/lib/netstandard2.1/Schedulers.dll
 
 [analyzerReferences]
-../../../../../../../usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/10.0.4/analyzers/dotnet/cs/
+<DOTNET>/packs/Microsoft.NETCore.App.Ref/10.0.4/analyzers/dotnet/cs/
  Microsoft.Interop.ComInterfaceGenerator.dll
  Microsoft.Interop.JavaScript.JSImportGenerator.dll
  Microsoft.Interop.LibraryImportGenerator.dll
  Microsoft.Interop.SourceGeneration.dll
  System.Text.Json.SourceGeneration.dll
  System.Text.RegularExpressions.Generator.dll
-../../../../../../../usr/share/dotnet/sdk/10.0.104/Sdks/Microsoft.NET.Sdk/analyzers/
+<DOTNET>/sdk/10.0.104/Sdks/Microsoft.NET.Sdk/analyzers/
  Microsoft.CodeAnalysis.CSharp.NetAnalyzers.dll
  Microsoft.CodeAnalysis.NetAnalyzers.dll
 
 [analyzerConfigFiles]
-../../../../../../../usr/share/dotnet/sdk/10.0.104/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig
+<DOTNET>/sdk/10.0.104/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_10_default.globalconfig
 obj/Debug/net10.0/Kestrel.Client.GeneratedMSBuildEditorConfig.editorconfig

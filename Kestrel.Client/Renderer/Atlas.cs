@@ -1,0 +1,2 @@
+namespace Kestrel.Client.Renderer;
+

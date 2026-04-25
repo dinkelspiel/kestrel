@@ -42,6 +42,7 @@ class KestrelApp
         _clientContext.Window = _window;
         _clientContext.Keyboard = input.Keyboards[0];
         _clientContext.Mouse = input.Mice[0];
+        _clientContext.Input = new Kestrel.Client.Input.Input(_clientContext.Keyboard);
         _imGui = new ImGuiController(gl, _window, input);
 
         _clientContext.Keyboard.KeyDown += (kb, key, _) =>
@@ -64,6 +65,7 @@ class KestrelApp
     {
         _imGui.Update((float)dt);
         _clientContext.sceneManager.activeScene.Update(dt);
+        _clientContext.Input.NewFrame();
     }
 
     void OnRender(double dt)

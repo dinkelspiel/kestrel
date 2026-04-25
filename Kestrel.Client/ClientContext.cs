@@ -1,3 +1,8 @@
+using System.Numerics;
+using Arch.Core;
+using Arch.Core.Extensions;
+using Kestrel.Client.ECS;
+using Kestrel.Client.Renderer;
 using Kestrel.Client.Scene;
 using Silk.NET.Input;
 using Silk.NET.OpenGL;
@@ -12,9 +17,26 @@ public class ClientContext
     public IWindow Window = null!;
     public IKeyboard Keyboard = null!;
     public IMouse Mouse = null!;
+    public Input.Input Input = null!;
+    public Camera camera = null!;
+
+    public World World { get; private set; } = World.Create();
+    public Entity? Player { get; set; }
 
     public ClientContext()
     {
         sceneManager = new(this);
+        Player = World.Create(new PlayerTag(), new TransformComponent(), new VelocityComponent());
+    }
+
+    public bool TryGetPlayer(out Entity player)
+    {
+        if (Player != null)
+        {
+            player = (Entity)Player;
+            return true;
+        }
+        player = default;
+        return false;
     }
 }
