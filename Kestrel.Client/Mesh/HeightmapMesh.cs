@@ -37,7 +37,8 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
 
         for (uint i = 0; i < size * size; i++)
         {
-            if (i % size == size) continue;
+            if (i % size == size - 1) continue;
+            if (i / size == size - 1) continue;
 
             indicies.AddRange([i, i + 1, i + (uint)size]);
             indicies.AddRange([i + 1, i + (uint)size + 1, i + (uint)size]);
