@@ -27,21 +27,25 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
         List<float> verticies = [];
         List<uint> indicies = [];
 
-        for (int x = 0; x < size; x++)
+        for (int x = 0; x < size - 1; x++)
         {
-            for (int y = 0; y < size; y++)
+            for (int y = 0; y < size - 1; y++)
             {
-                verticies.AddRange([x, noise.GetNoise(x, y), y, 0f, 1f]);
+                float noiseScale = 12;
+                float h00 = noise.GetNoise(x, y) * noiseScale;
+                float h01 = noise.GetNoise(x, y + 1) * noiseScale;
+                float h10 = noise.GetNoise(x + 1, y) * noiseScale;
+                float h11 = noise.GetNoise(x + 1, y + 1) * noiseScale;
+                uint i = (uint)(verticies.Count / 5);
+
+                verticies.AddRange([x, h00, y, 0.5f, 0.5f]);
+                verticies.AddRange([x, h01, y + 1, 0.5f, 0.5f]);
+                verticies.AddRange([x + 1, h10, y, 0.5f, 0.5f]);
+                verticies.AddRange([x + 1, h11, y + 1, 0.5f, 0.5f]);
+
+                indicies.AddRange([i, i + 1, i + 2]);
+                indicies.AddRange([i + 1, i + 3, i + 2]);
             }
-        }
-
-        for (uint i = 0; i < size * size; i++)
-        {
-            if (i % size == size - 1) continue;
-            if (i / size == size - 1) continue;
-
-            indicies.AddRange([i, i + 1, i + (uint)size]);
-            indicies.AddRange([i + 1, i + (uint)size + 1, i + (uint)size]);
         }
 
         Vertices = [.. verticies];
