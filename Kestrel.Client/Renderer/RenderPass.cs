@@ -24,6 +24,7 @@ public class RenderPass(ClientContext clientContext)
     {
         BillboardDrawInstruction.Setup(clientContext);
         CubeDrawInstruction.Setup(clientContext);
+        HeightmapDrawInstruction.Setup(clientContext);
 
         Atlas = new Texture(clientContext.Gl, Path.Combine(AppContext.BaseDirectory, "Assets", "atlas.png"));
         var shadersDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Shaders");
@@ -81,6 +82,11 @@ public class RenderPass(ClientContext clientContext)
     public void DrawBillboard(Matrix4x4 translation, (int X, int Y) atlasPosition)
     {
         drawInstructions.Enqueue(new BillboardDrawInstruction(clientContext, TileSize, translation, atlasPosition));
+    }
+
+    public void DrawHeightmap(Matrix4x4 translation, (int X, int Y) atlasPosition)
+    {
+        drawInstructions.Enqueue(new HeightmapDrawInstruction(clientContext, TileSize, translation, atlasPosition));
     }
 
     public void End()
@@ -152,6 +158,8 @@ public class RenderPass(ClientContext clientContext)
     {
         CubeDrawInstruction.CleanUp(clientContext);
         BillboardDrawInstruction.CleanUp(clientContext);
+        HeightmapDrawInstruction.CleanUp(clientContext);
+
         Atlas.Dispose();
         Shader.Dispose();
         ShadowShader.Dispose();

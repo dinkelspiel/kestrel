@@ -87,7 +87,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
             renderPass.DrawCube(model, (1, 0));
         });
 
-        new HeighmapMesh().Draw(renderPass);
+        renderPass.DrawHeightmap(Matrix4x4.Identity, (0, 0));
 
         renderPass.End();
     }
