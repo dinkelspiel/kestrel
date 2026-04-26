@@ -70,6 +70,7 @@ public class RenderPass(ClientContext clientContext)
     public void Begin()
     {
         drawInstructions.Clear();
+        TileSize = new Vector2(16f / Atlas.Width, 16f / Atlas.Height);
     }
 
     public void DrawCube(Matrix4x4 translation, (int X, int Y) atlasPosition)
@@ -89,6 +90,10 @@ public class RenderPass(ClientContext clientContext)
         // Shadows
         var sunPosition = new Vector3(-30f, 50f, -30f);
         var sceneCenter = new Vector3(64f, 0f, 64f);
+        if (clientContext.TryGetPlayer(out var player))
+            sceneCenter = player.Get<TransformComponent>().Postition;
+
+        sunPosition += sceneCenter;
         var lightView = Matrix4x4.CreateLookAt(
             sunPosition,
             sceneCenter,
@@ -135,7 +140,7 @@ public class RenderPass(ClientContext clientContext)
 
         Shader.SetMatrix4("uLightView", lightView);
         Shader.SetMatrix4("uLightProjection", lightProjection);
-        TileSize = new Vector2(16f / Atlas.Width, 16f / Atlas.Height);
+        Shader.SetVector3("uSunDirection", Vector3.Normalize(sunPosition - sceneCenter));
 
         foreach (IDrawInstruction drawInstruction in drawInstructions)
         {
@@ -149,5 +154,8 @@ public class RenderPass(ClientContext clientContext)
         BillboardDrawInstruction.CleanUp(clientContext);
         Atlas.Dispose();
         Shader.Dispose();
+        ShadowShader.Dispose();
+        clientContext.Gl.DeleteFramebuffer(ShadowFbo);
+        clientContext.Gl.DeleteTexture(ShadowMap);
     }
 }
