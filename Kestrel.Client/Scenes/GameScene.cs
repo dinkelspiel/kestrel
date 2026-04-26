@@ -2,6 +2,7 @@ using System.Numerics;
 using Arch.Core;
 using Arch.Core.Extensions;
 using Kestrel.Client.ECS;
+using Kestrel.Client.Mesh;
 using Kestrel.Client.Renderer;
 using Kestrel.Client.Renderer;
 using Kestrel.Client.Scene;
@@ -26,7 +27,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         clientContext.Mouse.Cursor.CursorMode = CursorMode.Raw;
         clientContext.Mouse.MouseMove += OnMouseMove;
 
-        camera = new();
+        camera = new(clientContext);
         clientContext.camera = camera;
 
         renderPass = new(clientContext);
@@ -77,6 +78,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         var gl = clientContext.Gl;
         renderPass.Begin();
         renderPass.DrawCube(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, -1, 0), (0, 0));
+        renderPass.DrawBillboard(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, 0, 0), (2, 0));
 
         clientContext.World.Query(new QueryDescription().WithAll<PlayerTag, TransformComponent>(), (ref TransformComponent transform) =>
         {
@@ -84,6 +86,9 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
             var model = Matrix4x4.CreateRotationY(MathF.PI - pYawRad) * Matrix4x4.CreateTranslation(transform.Postition);
             renderPass.DrawCube(model, (1, 0));
         });
+
+        new HeighmapMesh().Draw(renderPass);
+
         renderPass.End();
     }
 

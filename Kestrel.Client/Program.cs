@@ -56,7 +56,9 @@ class KestrelApp
 
         gl.Enable(EnableCap.DepthTest);
         gl.Enable(EnableCap.CullFace);
-        gl.ClearColor(Color.CornflowerBlue);
+        gl.Enable(EnableCap.Blend);
+        gl.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+        gl.ClearColor(Color.FromArgb(150, 199, 196));
 
         _clientContext.sceneManager.activeScene.Load();
     }

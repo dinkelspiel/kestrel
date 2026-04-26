@@ -2,4 +2,9 @@
 in vec2 vTexCoord;
 out vec4 FragColor;
 uniform sampler2D uTexture;
-void main() { FragColor = texture(uTexture, vTexCoord); }
+void main() {
+  vec4 color = texture(uTexture, vTexCoord);
+  if (color.a < 0.1)
+    discard;
+  FragColor = color;
+}

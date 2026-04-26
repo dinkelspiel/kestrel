@@ -21,7 +21,7 @@ ProjectAssetsFile=<PATH>obj/project.assets.json
 RootNamespace=Kestrel.Client
 RunAnalyzers=
 RunAnalyzersDuringLiveAnalysis=
-SolutionPath=*Undefined*
+SolutionPath=<PATH>../Kestrel.sln
 TargetFrameworkIdentifier=.NETCoreApp
 TargetPath=<PATH>bin/Debug/net10.0/Kestrel.Client.dll
 TargetRefPath=<PATH>obj/Debug/net10.0/ref/Kestrel.Client.dll
@@ -57,6 +57,8 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 ClientContext.cs
 ECS/Components.cs
 Input/Input.cs
+Mesh/HeighmapMesh.cs
+MMath/FastNoiseLite.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  Kestrel.Client.AssemblyInfo.cs
