@@ -57,7 +57,11 @@ TemporaryDependencyNodeTargetIdentifier=net10.0
 ClientContext.cs
 ECS/Components.cs
 Input/Input.cs
-Mesh/HeighmapMesh.cs
+Mesh/
+ BillboardDrawInstruction.cs
+ CubeDrawInstruction.cs
+ DrawInstruction.cs
+ HeighmapMesh.cs
 MMath/FastNoiseLite.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
