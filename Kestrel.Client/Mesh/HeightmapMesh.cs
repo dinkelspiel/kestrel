@@ -22,9 +22,9 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
     {
         FastNoiseLite noise = new();
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-        int size = 512;
+        int size = 712;
         float center = size * 0.5f;
-        float radius = size * 0.4f;
+        float radius = size * 0.3f;
 
         float GetHeight(int x, int y)
         {

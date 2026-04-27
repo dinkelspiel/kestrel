@@ -11,10 +11,22 @@ uniform sampler2D uShadowMap;
 uniform sampler2D uCameraDepthMap;
 uniform sampler2D uCameraNormalMap;
 uniform int uIsHeightmap;
+uniform mat4 uView;
+vec3 cameraPos = inverse(uView)[3].xyz;
+float fogNear = 80;
+float fogFar = 150;
+vec3 skyColor = vec3(0.588, 0.780, 0.769);
+// vec3 skyColor = vec3(1, 0, 0);
 
 const float outlineThreshold = 0.00008;
 const float outlineWidth = 3.0 / 1024.0;
 const float steepNormalThreshold = 0.85;
+
+float distanceBetweenPointAndCamera() {
+  return sqrt(pow(vWorldPos.x - cameraPos.x, 2) +
+              pow(vWorldPos.y - cameraPos.y, 2) +
+              pow(vWorldPos.z - cameraPos.z, 2));
+}
 
 float depthEdge(vec2 uv) {
   float d = texture(uCameraDepthMap, uv).r;
@@ -65,6 +77,12 @@ void main() {
       normalize(texture(uCameraNormalMap, screenUv).rgb * 2.0 - 1.0);
   float upDot = abs(dot(cameraNormal, vec3(0.0, 1.0, 0.0)));
 
+  if (uIsHeightmap == 1 && upDot < steepNormalThreshold) {
+    color.r = 155.0 / 255.0;
+    color.g = 177.0 / 255.0;
+    color.b = 152.0 / 255.0;
+  }
+
   if (uIsHeightmap == 1 && vWorldPos.y < 0.5) {
     color = vec4(155.0 / 255.0, 177.0 / 255.0, 152.0 / 255.0, 1);
   }
@@ -72,18 +90,20 @@ void main() {
   if (vWorldPos.y < 0) {
     vec3 waterColor = vec3(86.0 / 255.0, 128.0 / 255.0, 129.0 / 255.0);
 
-    FragColor = vec4(mix(waterColor.xyz, color.rgb, 0.5), 1.0);
+    color = vec4(mix(waterColor.xyz, color.rgb, 0.5), 1.0);
     // mix(waterColor.xyz, color.rgb, 0.5) * mix(0.8, 1.0, visibility), 1.0);
-    return;
   }
 
-  if (uIsHeightmap == 1 && upDot < steepNormalThreshold) {
-    color.r = 155.0 / 255.0;
-    color.g = 177.0 / 255.0;
-    color.b = 152.0 / 255.0;
+  float pixelDistanceToCamera = distanceBetweenPointAndCamera();
+  if (pixelDistanceToCamera > fogNear) {
+    pixelDistanceToCamera = pixelDistanceToCamera - fogNear;
+    float delta = fogFar - fogNear;
+    pixelDistanceToCamera = pixelDistanceToCamera / delta;
+    color =
+        vec4(mix(color.rgb, skyColor, clamp(pixelDistanceToCamera, 0, 1)), 1);
   }
 
-  float outline = depthEdge(screenUv);
+  float outline = (vWorldPos.y > 0) ? depthEdge(screenUv) : 0.0;
   FragColor = vec4(mix(color.rgb, color.rgb * 0.8, outline), color.a);
   //   FragColor = vec4(color.rgb * mix(0.8, 1.0, visibility), color.a);
 }
