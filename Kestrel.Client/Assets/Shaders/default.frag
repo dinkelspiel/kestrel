@@ -10,6 +10,7 @@ uniform sampler2D uTexture;
 uniform sampler2D uShadowMap;
 uniform sampler2D uCameraDepthMap;
 uniform sampler2D uCameraNormalMap;
+uniform int uIsHeightmap;
 
 const float outlineThreshold = 0.00008;
 const float outlineWidth = 3.0 / 1024.0;
@@ -64,10 +65,8 @@ void main() {
       normalize(texture(uCameraNormalMap, screenUv).rgb * 2.0 - 1.0);
   float upDot = abs(dot(cameraNormal, vec3(0.0, 1.0, 0.0)));
 
-  if (upDot < steepNormalThreshold) {
-    color.r = 155.0 / 255.0;
-    color.g = 177.0 / 255.0;
-    color.b = 152.0 / 255.0;
+  if (uIsHeightmap == 1 && vWorldPos.y < 0.5) {
+    color = vec4(155.0 / 255.0, 177.0 / 255.0, 152.0 / 255.0, 1);
   }
 
   if (vWorldPos.y < 0) {
@@ -76,6 +75,12 @@ void main() {
     FragColor = vec4(mix(waterColor.xyz, color.rgb, 0.5), 1.0);
     // mix(waterColor.xyz, color.rgb, 0.5) * mix(0.8, 1.0, visibility), 1.0);
     return;
+  }
+
+  if (uIsHeightmap == 1 && upDot < steepNormalThreshold) {
+    color.r = 155.0 / 255.0;
+    color.g = 177.0 / 255.0;
+    color.b = 152.0 / 255.0;
   }
 
   float outline = depthEdge(screenUv);
