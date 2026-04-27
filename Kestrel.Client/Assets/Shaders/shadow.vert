@@ -9,8 +9,11 @@ uniform vec2 uTileOffset;
 uniform vec2 uTileSize;
 
 out vec2 vTexCoord;
+out vec3 vWorldPos;
 
 void main() {
-  gl_Position = uLightProjection * uLightView * uModel * vec4(aPos, 1.0);
+  vec4 worldPos = uModel * vec4(aPos, 1.0);
+  gl_Position = uLightProjection * uLightView * worldPos;
   vTexCoord = uTileOffset + aTexCoord * uTileSize;
+  vWorldPos = worldPos.xyz;
 }

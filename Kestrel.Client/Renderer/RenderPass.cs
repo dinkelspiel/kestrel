@@ -16,6 +16,7 @@ public class RenderPass(ClientContext clientContext)
 
     public uint CameraDepthFbo;
     public uint CameraDepthMap;
+    public uint CameraNormalMap;
     const uint CameraDepthSize = 10240;
     const uint CameraDepthPreviewSize = 256;
 
@@ -23,6 +24,7 @@ public class RenderPass(ClientContext clientContext)
     public Shader Shader = null!;
     public Shader SkyShader = null!;
     public Shader DebugDepthShader = null!;
+    public Shader DebugTextureShader = null!;
     public Texture Atlas = null!;
     public uint DebugQuadVao;
     public uint DebugQuadVbo;
@@ -85,6 +87,7 @@ public class RenderPass(ClientContext clientContext)
         // Camera Depth
         CameraDepthFbo = clientContext.Gl.GenFramebuffer();
         CameraDepthMap = clientContext.Gl.GenTexture();
+        CameraNormalMap = clientContext.Gl.GenTexture();
 
         clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraDepthMap);
         clientContext.Gl.TexImage2D(
@@ -104,14 +107,36 @@ public class RenderPass(ClientContext clientContext)
         fixed (float* borderColorPtr = borderColor)
             clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, borderColorPtr);
 
+        clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraNormalMap);
+        clientContext.Gl.TexImage2D(
+            TextureTarget.Texture2D,
+            0,
+            InternalFormat.Rgba16f,
+            CameraDepthSize,
+            CameraDepthSize,
+            0,
+            PixelFormat.Rgba,
+            PixelType.Float,
+            null);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Nearest);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
         clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, CameraDepthFbo);
+        clientContext.Gl.FramebufferTexture2D(
+            FramebufferTarget.Framebuffer,
+            FramebufferAttachment.ColorAttachment0,
+            TextureTarget.Texture2D,
+            CameraNormalMap,
+            0);
         clientContext.Gl.FramebufferTexture2D(
             FramebufferTarget.Framebuffer,
             FramebufferAttachment.DepthAttachment,
             TextureTarget.Texture2D,
             CameraDepthMap,
             0);
-        clientContext.Gl.DrawBuffer(DrawBufferMode.None);
+        clientContext.Gl.DrawBuffer(DrawBufferMode.ColorAttachment0);
         clientContext.Gl.ReadBuffer(ReadBufferMode.None);
         clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 
@@ -120,6 +145,11 @@ public class RenderPass(ClientContext clientContext)
             clientContext.Gl,
             Path.Combine(shadersDir, "debug_depth.vert"),
             Path.Combine(shadersDir, "debug_depth.frag"));
+
+        DebugTextureShader = Shader.FromFiles(
+            clientContext.Gl,
+            Path.Combine(shadersDir, "debug_depth.vert"),
+            Path.Combine(shadersDir, "debug_texture.frag"));
 
         float[] debugQuadVertices =
         [
@@ -215,7 +245,7 @@ public class RenderPass(ClientContext clientContext)
         Matrix4x4 view = clientContext.camera.GetViewMatrix();
         clientContext.Gl.Viewport(0, 0, CameraDepthSize, CameraDepthSize);
         clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, CameraDepthFbo);
-        clientContext.Gl.Clear(ClearBufferMask.DepthBufferBit);
+        clientContext.Gl.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         ShadowShader.Use();
         ShadowShader.SetInt("uTexture", 0);
@@ -287,16 +317,25 @@ public class RenderPass(ClientContext clientContext)
     {
         uint previewSize = Math.Min(ShadowPreviewSize, Math.Min(windowWidth, windowHeight));
         int padding = 16;
-        int previewX = Math.Max(0, (int)(windowWidth - previewSize) - padding);
+        int depthPreviewX = Math.Max(0, (int)(windowWidth - previewSize) - padding);
+        int normalPreviewX = Math.Max(0, depthPreviewX - (int)previewSize - padding);
 
-        clientContext.Gl.Viewport(previewX, padding, previewSize, previewSize);
         clientContext.Gl.Disable(EnableCap.DepthTest);
         clientContext.Gl.Disable(EnableCap.CullFace);
 
+        clientContext.Gl.Viewport(depthPreviewX, padding, previewSize, previewSize);
         DebugDepthShader.Use();
         DebugDepthShader.SetInt("uDepthTexture", 0);
         clientContext.Gl.ActiveTexture(TextureUnit.Texture0);
         clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraDepthMap);
+        clientContext.Gl.BindVertexArray(DebugQuadVao);
+        clientContext.Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+
+        clientContext.Gl.Viewport(normalPreviewX, padding, previewSize, previewSize);
+        DebugTextureShader.Use();
+        DebugTextureShader.SetInt("uTexture", 0);
+        clientContext.Gl.ActiveTexture(TextureUnit.Texture0);
+        clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraNormalMap);
         clientContext.Gl.BindVertexArray(DebugQuadVao);
         clientContext.Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
 
@@ -316,8 +355,12 @@ public class RenderPass(ClientContext clientContext)
         SkyShader.Dispose();
         ShadowShader.Dispose();
         DebugDepthShader.Dispose();
+        DebugTextureShader.Dispose();
         clientContext.Gl.DeleteFramebuffer(ShadowFbo);
         clientContext.Gl.DeleteTexture(ShadowMap);
+        clientContext.Gl.DeleteFramebuffer(CameraDepthFbo);
+        clientContext.Gl.DeleteTexture(CameraDepthMap);
+        clientContext.Gl.DeleteTexture(CameraNormalMap);
         clientContext.Gl.DeleteVertexArray(DebugQuadVao);
         clientContext.Gl.DeleteBuffer(DebugQuadVbo);
     }
