@@ -14,10 +14,12 @@ out vec2 vTexCoord;
 out vec2 vLocalTexCoord;
 out vec4 vLightSpacePos;
 out vec3 vWorldPos;
+out vec4 vClipPos;
 
 void main() {
   vec4 worldPos = uModel * vec4(aPos, 1.0);
   gl_Position = uProjection * uView * worldPos;
+  vClipPos = gl_Position;
   vTexCoord = uTileOffset + aTexCoord * uTileSize;
   vLocalTexCoord = aTexCoord;
   vLightSpacePos = uLightProjection * uLightView * worldPos;

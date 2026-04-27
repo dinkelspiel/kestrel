@@ -2,11 +2,27 @@
 in vec2 vTexCoord;
 in vec4 vLightSpacePos;
 in vec3 vWorldPos;
+in vec4 vClipPos;
 
 out vec4 FragColor;
 
 uniform sampler2D uTexture;
 uniform sampler2D uShadowMap;
+uniform sampler2D uCameraDepthMap;
+
+const float outlineThreshold = 0.00008;
+const float outlineWidth = 3.0 / 1024.0;
+
+float depthEdge(vec2 uv) {
+  float d = texture(uCameraDepthMap, uv).r;
+  float d1 = texture(uCameraDepthMap, uv + vec2(outlineWidth, 0.0)).r;
+  float d2 = texture(uCameraDepthMap, uv + vec2(-outlineWidth, 0.0)).r;
+  float d3 = texture(uCameraDepthMap, uv + vec2(0.0, outlineWidth)).r;
+  float d4 = texture(uCameraDepthMap, uv + vec2(0.0, -outlineWidth)).r;
+  float maxDiff =
+      max(max(abs(d - d1), abs(d - d2)), max(abs(d - d3), abs(d - d4)));
+  return maxDiff > outlineThreshold ? 1.0 : 0.0;
+}
 uniform vec3 uSunDirection;
 uniform int uWireframe;
 
@@ -55,6 +71,8 @@ void main() {
     return;
   }
 
-  FragColor = vec4(color.rgb, color.a);
+  vec2 depthUv = (vClipPos.xy / vClipPos.w) * 0.5 + 0.5;
+  float outline = depthEdge(depthUv);
+  FragColor = vec4(mix(color.rgb, color.rgb * 0.8, outline), color.a);
   //   FragColor = vec4(color.rgb * mix(0.8, 1.0, visibility), color.a);
 }

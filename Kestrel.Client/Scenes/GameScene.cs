@@ -54,22 +54,24 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
             ref var vel = ref player.Get<VelocityComponent>();
             vel.Velocity.X = wish.X * camera.Speed;
             vel.Velocity.Z = wish.Z * camera.Speed;
-            if (input.IsKeyPressed(Key.Space) && player.Get<TransformComponent>().Postition.Y <= 0f)
+            // if (input.IsKeyPressed(Key.Space) && player.Get<TransformComponent>().Postition.Y <= 0f)
+            if (input.IsKeyPressed(Key.Space))
                 vel.Velocity.Y = JumpSpeed;
-
+            if (input.IsKeyPressed(Key.ShiftLeft))
+                vel.Velocity.Y = 0;
             player.Get<TransformComponent>().Yaw = camera.Yaw;
         }
 
         clientContext.World.Query(new QueryDescription().WithAll<VelocityComponent, TransformComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
         {
-            velocity.Velocity.Y -= Gravity * step;
+            // velocity.Velocity.Y -= Gravity * step;
             transform.Postition += velocity.Velocity * step;
 
-            if (transform.Postition.Y < 0f)
-            {
-                transform.Postition.Y = 0f;
-                if (velocity.Velocity.Y < 0f) velocity.Velocity.Y = 0f;
-            }
+            // if (transform.Postition.Y < 0f)
+            // {
+            //     transform.Postition.Y = 0f;
+            //     if (velocity.Velocity.Y < 0f) velocity.Velocity.Y = 0f;
+            // }
         });
     }
 
