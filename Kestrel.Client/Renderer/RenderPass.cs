@@ -268,6 +268,7 @@ public class RenderPass(ClientContext clientContext)
         Shader.SetInt("uTexture", 0);
         Shader.SetInt("uShadowMap", 1);
         Shader.SetInt("uCameraDepthMap", 2);
+        Shader.SetInt("uCameraNormalMap", 3);
         Shader.SetInt("uWireframe", 0);
 
         Atlas.Bind(TextureUnit.Texture0);
@@ -277,6 +278,9 @@ public class RenderPass(ClientContext clientContext)
 
         clientContext.Gl.ActiveTexture(TextureUnit.Texture2);
         clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraDepthMap);
+
+        clientContext.Gl.ActiveTexture(TextureUnit.Texture3);
+        clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraNormalMap);
 
         Shader.SetMatrix4("uLightView", lightView);
         Shader.SetMatrix4("uLightProjection", lightProjection);

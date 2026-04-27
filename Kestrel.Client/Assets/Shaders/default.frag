@@ -9,9 +9,11 @@ out vec4 FragColor;
 uniform sampler2D uTexture;
 uniform sampler2D uShadowMap;
 uniform sampler2D uCameraDepthMap;
+uniform sampler2D uCameraNormalMap;
 
 const float outlineThreshold = 0.00008;
 const float outlineWidth = 3.0 / 1024.0;
+const float steepNormalThreshold = 0.85;
 
 float depthEdge(vec2 uv) {
   float d = texture(uCameraDepthMap, uv).r;
@@ -57,7 +59,12 @@ void main() {
   proj = proj * 0.5 + 0.5;
   float visibility = shadowVisibility(proj);
 
-  if (vWorldPos.y < 0.5) {
+  vec2 screenUv = (vClipPos.xy / vClipPos.w) * 0.5 + 0.5;
+  vec3 cameraNormal =
+      normalize(texture(uCameraNormalMap, screenUv).rgb * 2.0 - 1.0);
+  float upDot = abs(dot(cameraNormal, vec3(0.0, 1.0, 0.0)));
+
+  if (upDot < steepNormalThreshold) {
     color.r = 155.0 / 255.0;
     color.g = 177.0 / 255.0;
     color.b = 152.0 / 255.0;
@@ -71,8 +78,7 @@ void main() {
     return;
   }
 
-  vec2 depthUv = (vClipPos.xy / vClipPos.w) * 0.5 + 0.5;
-  float outline = depthEdge(depthUv);
+  float outline = depthEdge(screenUv);
   FragColor = vec4(mix(color.rgb, color.rgb * 0.8, outline), color.a);
   //   FragColor = vec4(color.rgb * mix(0.8, 1.0, visibility), color.a);
 }
