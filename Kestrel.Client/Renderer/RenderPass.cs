@@ -11,10 +11,11 @@ public class RenderPass(ClientContext clientContext)
     public Shader ShadowShader = null!;
     public uint ShadowFbo;
     public uint ShadowMap;
-    const uint ShadowSize = 2048;
+    const uint ShadowSize = 10240;
     const uint ShadowPreviewSize = 256;
 
     public Shader Shader = null!;
+    public Shader SkyShader = null!;
     public Shader DebugDepthShader = null!;
     public Texture Atlas = null!;
     public uint DebugQuadVao;
@@ -33,6 +34,7 @@ public class RenderPass(ClientContext clientContext)
         Atlas = new Texture(clientContext.Gl, Path.Combine(AppContext.BaseDirectory, "Assets", "atlas.png"));
         var shadersDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Shaders");
         Shader = Shader.FromFiles(clientContext.Gl, Path.Combine(shadersDir, "default.vert"), Path.Combine(shadersDir, "default.frag"));
+        SkyShader = Shader.FromFiles(clientContext.Gl, Path.Combine(shadersDir, "debug_depth.vert"), Path.Combine(shadersDir, "sky.frag"));
 
 
         // Shadows
@@ -54,6 +56,9 @@ public class RenderPass(ClientContext clientContext)
         clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
         clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+        float[] borderColor = [1f, 1f, 1f, 1f];
+        fixed (float* borderColorPtr = borderColor)
+            clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, borderColorPtr);
 
         clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, ShadowFbo);
         clientContext.Gl.FramebufferTexture2D(
@@ -125,7 +130,8 @@ public class RenderPass(ClientContext clientContext)
         var size = clientContext.Window.Size;
 
         // Shadows
-        var sunPosition = new Vector3(-30f, 50f, -30f);
+        var sunDirection = Vector3.Normalize(new Vector3(-70f, 35f, -70f));
+        var sunPosition = sunDirection * 200f;
         var sceneCenter = new Vector3(64f, 0f, 64f);
         if (clientContext.TryGetPlayer(out var player))
             sceneCenter = player.Get<TransformComponent>().Postition;
@@ -137,10 +143,10 @@ public class RenderPass(ClientContext clientContext)
             Vector3.UnitY);
 
         var lightProjection = Matrix4x4.CreateOrthographic(
-            10f,
-            10f,
+            200f,
+            200f,
             1f,
-            150f);
+            300f);
 
         clientContext.Gl.Viewport(0, 0, ShadowSize, ShadowSize);
         clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, ShadowFbo);
@@ -164,9 +170,10 @@ public class RenderPass(ClientContext clientContext)
         var projection = Matrix4x4.CreatePerspectiveFieldOfView(
             MathF.PI / 180f * 65f,
             (float)size.X / size.Y,
-            0.1f, 100f);
+            0.1f, 1000f);
 
         Matrix4x4 view = clientContext.camera.GetViewMatrix();
+        DrawSky(view, projection);
 
         Shader.Use();
         Shader.SetInt("uTexture", 0);
@@ -187,24 +194,30 @@ public class RenderPass(ClientContext clientContext)
             drawInstruction.Draw(view, projection, Shader);
         }
 
-        Shader.SetInt("uWireframe", 1);
-        clientContext.Gl.Disable(EnableCap.CullFace);
-        clientContext.Gl.Enable(EnableCap.PolygonOffsetLine);
-        clientContext.Gl.PolygonOffset(-1f, -1f);
-        clientContext.Gl.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Line);
-
-        foreach (IDrawInstruction drawInstruction in drawInstructions)
-        {
-            if (drawInstruction is HeightmapDrawInstruction)
-                drawInstruction.Draw(view, projection, Shader);
-        }
-
-        clientContext.Gl.PolygonMode(TriangleFace.FrontAndBack, PolygonMode.Fill);
-        clientContext.Gl.Disable(EnableCap.PolygonOffsetLine);
-        clientContext.Gl.Enable(EnableCap.CullFace);
-        Shader.SetInt("uWireframe", 0);
-
         DrawShadowPreview((uint)size.X, (uint)size.Y);
+    }
+
+    void DrawSky(Matrix4x4 view, Matrix4x4 projection)
+    {
+        if (!Matrix4x4.Invert(view, out var inverseView) || !Matrix4x4.Invert(projection, out var inverseProjection))
+            return;
+
+        var cameraPosition = new Vector3(inverseView.M41, inverseView.M42, inverseView.M43);
+
+        clientContext.Gl.DepthMask(false);
+        clientContext.Gl.Disable(EnableCap.DepthTest);
+        clientContext.Gl.Disable(EnableCap.CullFace);
+
+        SkyShader.Use();
+        SkyShader.SetMatrix4("uInverseView", inverseView);
+        SkyShader.SetMatrix4("uInverseProjection", inverseProjection);
+        SkyShader.SetVector3("uCameraPos", cameraPosition);
+        clientContext.Gl.BindVertexArray(DebugQuadVao);
+        clientContext.Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
+
+        clientContext.Gl.Enable(EnableCap.DepthTest);
+        clientContext.Gl.Enable(EnableCap.CullFace);
+        clientContext.Gl.DepthMask(true);
     }
 
     void DrawShadowPreview(uint windowWidth, uint windowHeight)
@@ -237,6 +250,7 @@ public class RenderPass(ClientContext clientContext)
 
         Atlas.Dispose();
         Shader.Dispose();
+        SkyShader.Dispose();
         ShadowShader.Dispose();
         DebugDepthShader.Dispose();
         clientContext.Gl.DeleteFramebuffer(ShadowFbo);

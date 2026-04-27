@@ -22,7 +22,16 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
     {
         FastNoiseLite noise = new();
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-        int size = 128;
+        int size = 512;
+        float center = size * 0.5f;
+        float radius = size * 0.4f;
+
+        float GetHeight(int x, int y)
+        {
+            float distanceToCenter = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+            float falloff = Math.Clamp(1f - distanceToCenter / radius, -0.5f, 1f);
+            return (noise.GetNoise(x, y) + 1) * 24f * falloff;
+        }
 
         List<float> verticies = [];
         List<uint> indicies = [];
@@ -31,11 +40,10 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
         {
             for (int y = 0; y < size - 1; y++)
             {
-                float noiseScale = 12;
-                float h00 = noise.GetNoise(x, y) * noiseScale;
-                float h01 = noise.GetNoise(x, y + 1) * noiseScale;
-                float h10 = noise.GetNoise(x + 1, y) * noiseScale;
-                float h11 = noise.GetNoise(x + 1, y + 1) * noiseScale;
+                float h00 = GetHeight(x, y);
+                float h01 = GetHeight(x, y + 1);
+                float h10 = GetHeight(x + 1, y);
+                float h11 = GetHeight(x + 1, y + 1);
                 uint i = (uint)(verticies.Count / 5);
 
                 verticies.AddRange([x, h00, y, 0.5f, 0.5f]);

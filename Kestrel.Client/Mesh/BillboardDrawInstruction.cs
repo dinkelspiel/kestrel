@@ -9,10 +9,10 @@ public class BillboardDrawInstruction(ClientContext clientContext, Vector2 tileS
 
     static readonly float[] BillboardVertices =
     [
-        -0.5f*16, -0.5f * 16,  0f*16,  0f, 1f,
-         0.5f*16, -0.5f * 16,  0f*16,  1f, 1f,
-         0.5f*16,  0.5f * 16,  0f*16,  1f, 0f,
-        -0.5f*16,  0.5f * 16,  0f*16,  0f, 0f,
+        -0.5f, -0.5f,  0f,  0f, 1f,
+         0.5f, -0.5f,  0f,  1f, 1f,
+         0.5f,  0.5f,  0f,  1f, 0f,
+        -0.5f,  0.5f,  0f,  0f, 0f,
     ];
 
     static readonly uint[] BillboardIndices =
@@ -50,7 +50,7 @@ public class BillboardDrawInstruction(ClientContext clientContext, Vector2 tileS
 
         shader.SetVector2("uTileOffset", new Vector2(tileSize.X * atlasPosition.X, tileSize.Y * atlasPosition.Y));
         shader.SetVector2("uTileSize", tileSize);
-        shader.SetMatrix4("uModel", translation);
+        shader.SetMatrix4("uModel", translation * clientContext.camera.GetViewRotation());
         clientContext.Gl.DrawElements(PrimitiveType.Triangles, (uint)BillboardIndices.Length, DrawElementsType.UnsignedInt, null);
     }
 

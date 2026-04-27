@@ -27,7 +27,7 @@ public class ClientContext
     {
         sceneManager = new(this);
         Player = World.Create(new PlayerTag(), new TransformComponent(), new VelocityComponent());
-        Player?.Get<TransformComponent>().Postition = new(0, 0, 0);
+        Player?.Get<TransformComponent>().Postition = new(60, 0, 60);
     }
 
     public bool TryGetPlayer(out Entity player)

@@ -78,7 +78,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         var gl = clientContext.Gl;
         renderPass.Begin();
         renderPass.DrawCube(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, -1, 0), (0, 0));
-        renderPass.DrawBillboard(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, 0, 0), (0, 0));
+        renderPass.DrawBillboard(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, 0, 0), (2, 0));
 
         clientContext.World.Query(new QueryDescription().WithAll<PlayerTag, TransformComponent>(), (ref TransformComponent transform) =>
         {
@@ -87,7 +87,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
             renderPass.DrawCube(model, (1, 0));
         });
 
-        // renderPass.DrawHeightmap(Matrix4x4.Identity, (0, 0));
+        renderPass.DrawHeightmap(Matrix4x4.Identity, (0, 0));
 
         renderPass.End();
     }
