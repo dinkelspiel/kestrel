@@ -50,10 +50,11 @@ void main() {
   if (vWorldPos.y < 0) {
     vec3 waterColor = vec3(86.0 / 255.0, 128.0 / 255.0, 129.0 / 255.0);
 
-    FragColor = vec4(
-        mix(waterColor.xyz, color.rgb, 0.5) * mix(0.8, 1.0, visibility), 1.0);
+    FragColor = vec4(mix(waterColor.xyz, color.rgb, 0.5), 1.0);
+    // mix(waterColor.xyz, color.rgb, 0.5) * mix(0.8, 1.0, visibility), 1.0);
     return;
   }
 
-  FragColor = vec4(color.rgb * mix(0.8, 1.0, visibility), color.a);
+  FragColor = vec4(color.rgb, color.a);
+  //   FragColor = vec4(color.rgb * mix(0.8, 1.0, visibility), color.a);
 }

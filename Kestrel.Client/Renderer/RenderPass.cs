@@ -14,6 +14,12 @@ public class RenderPass(ClientContext clientContext)
     const uint ShadowSize = 10240;
     const uint ShadowPreviewSize = 256;
 
+    public uint CameraDepthFbo;
+    public uint CameraDepthMap;
+    const uint CameraDepthSize = 10240;
+    const uint CameraDepthPreviewSize = 256;
+
+
     public Shader Shader = null!;
     public Shader SkyShader = null!;
     public Shader DebugDepthShader = null!;
@@ -76,6 +82,40 @@ public class RenderPass(ClientContext clientContext)
             Path.Combine(shadersDir, "shadow.vert"),
             Path.Combine(shadersDir, "shadow.frag"));
 
+        // Camera Depth
+        CameraDepthFbo = clientContext.Gl.GenFramebuffer();
+        CameraDepthMap = clientContext.Gl.GenTexture();
+
+        clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraDepthMap);
+        clientContext.Gl.TexImage2D(
+            TextureTarget.Texture2D,
+            0,
+            InternalFormat.DepthComponent,
+            CameraDepthSize,
+            CameraDepthSize,
+            0,
+            PixelFormat.DepthComponent,
+            PixelType.Float,
+            null);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Nearest);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
+        fixed (float* borderColorPtr = borderColor)
+            clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBorderColor, borderColorPtr);
+
+        clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, CameraDepthFbo);
+        clientContext.Gl.FramebufferTexture2D(
+            FramebufferTarget.Framebuffer,
+            FramebufferAttachment.DepthAttachment,
+            TextureTarget.Texture2D,
+            CameraDepthMap,
+            0);
+        clientContext.Gl.DrawBuffer(DrawBufferMode.None);
+        clientContext.Gl.ReadBuffer(ReadBufferMode.None);
+        clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+        // Debug
         DebugDepthShader = Shader.FromFiles(
             clientContext.Gl,
             Path.Combine(shadersDir, "debug_depth.vert"),
@@ -148,31 +188,50 @@ public class RenderPass(ClientContext clientContext)
             1f,
             300f);
 
-        clientContext.Gl.Viewport(0, 0, ShadowSize, ShadowSize);
-        clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, ShadowFbo);
-        clientContext.Gl.Clear(ClearBufferMask.DepthBufferBit);
+        // clientContext.Gl.Viewport(0, 0, ShadowSize, ShadowSize);
+        // clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, ShadowFbo);
+        // clientContext.Gl.Clear(ClearBufferMask.DepthBufferBit);
 
-        ShadowShader.Use();
-        ShadowShader.SetInt("uTexture", 0);
-        ShadowShader.SetMatrix4("uLightView", lightView);
-        ShadowShader.SetMatrix4("uLightProjection", lightProjection);
-        Atlas.Bind(TextureUnit.Texture0);
+        // ShadowShader.Use();
+        // ShadowShader.SetInt("uTexture", 0);
+        // ShadowShader.SetMatrix4("uLightView", lightView);
+        // ShadowShader.SetMatrix4("uLightProjection", lightProjection);
+        // Atlas.Bind(TextureUnit.Texture0);
 
-        foreach (IDrawInstruction drawInstruction in drawInstructions)
-        {
-            drawInstruction.Draw(lightView, lightProjection, ShadowShader);
-        }
+        // foreach (IDrawInstruction drawInstruction in drawInstructions)
+        // {
+        //     drawInstruction.Draw(lightView, lightProjection, ShadowShader);
+        // }
 
-        clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-        clientContext.Gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
+        // clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        // clientContext.Gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
 
-        // Regular
+        // Camera Depth
         var projection = Matrix4x4.CreatePerspectiveFieldOfView(
             MathF.PI / 180f * 65f,
             (float)size.X / size.Y,
             0.1f, 1000f);
 
         Matrix4x4 view = clientContext.camera.GetViewMatrix();
+        clientContext.Gl.Viewport(0, 0, CameraDepthSize, CameraDepthSize);
+        clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, CameraDepthFbo);
+        clientContext.Gl.Clear(ClearBufferMask.DepthBufferBit);
+
+        ShadowShader.Use();
+        ShadowShader.SetInt("uTexture", 0);
+        ShadowShader.SetMatrix4("uLightView", view);
+        ShadowShader.SetMatrix4("uLightProjection", projection);
+        Atlas.Bind(TextureUnit.Texture0);
+
+        foreach (IDrawInstruction drawInstruction in drawInstructions)
+        {
+            drawInstruction.Draw(view, projection, ShadowShader);
+        }
+
+        clientContext.Gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        clientContext.Gl.Viewport(0, 0, (uint)size.X, (uint)size.Y);
+
+        // Regular
         DrawSky(view, projection);
 
         Shader.Use();
@@ -233,7 +292,7 @@ public class RenderPass(ClientContext clientContext)
         DebugDepthShader.Use();
         DebugDepthShader.SetInt("uDepthTexture", 0);
         clientContext.Gl.ActiveTexture(TextureUnit.Texture0);
-        clientContext.Gl.BindTexture(TextureTarget.Texture2D, ShadowMap);
+        clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraDepthMap);
         clientContext.Gl.BindVertexArray(DebugQuadVao);
         clientContext.Gl.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
 
