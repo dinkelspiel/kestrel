@@ -41,11 +41,11 @@ void main() {
   proj = proj * 0.5 + 0.5;
   float visibility = shadowVisibility(proj);
 
-  //   if (vWorldPos.y < 0.5) {
-  //     color.r = 155.0 / 255.0;
-  //     color.g = 177.0 / 255.0;
-  //     color.b = 152.0 / 255.0;
-  //   }
+  if (vWorldPos.y < 0.5) {
+    color.r = 155.0 / 255.0;
+    color.g = 177.0 / 255.0;
+    color.b = 152.0 / 255.0;
+  }
 
   if (vWorldPos.y < 0) {
     vec3 waterColor = vec3(86.0 / 255.0, 128.0 / 255.0, 129.0 / 255.0);
