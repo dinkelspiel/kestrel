@@ -1,5 +1,6 @@
 using System.Numerics;
 using Kestrel.Client.MMath;
+using Kestrel.Client.Renderer;
 using Silk.NET.OpenGL;
 
 namespace Kestrel.Client.Mesh;
@@ -27,7 +28,7 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
         Size = 712;
         float center = Size * 0.5f;
-        float radius = Size * 0.3f;
+        float radius = Size * 0.4f;
 
         Heightmap = new float[Size, Size];
 
@@ -131,4 +132,6 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
         clientContext.Gl.DeleteBuffer(Vbo);
         clientContext.Gl.DeleteBuffer(Ebo);
     }
+
+    public ShaderKind GetShader() => ShaderKind.REGULAR;
 }

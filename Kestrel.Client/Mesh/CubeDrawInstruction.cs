@@ -1,4 +1,5 @@
 using System.Numerics;
+using Kestrel.Client.Renderer;
 using Silk.NET.OpenGL;
 
 namespace Kestrel.Client.Mesh;
@@ -93,4 +94,6 @@ public class CubeDrawInstruction(ClientContext clientContext, Vector2 tileSize, 
         clientContext.Gl.DeleteBuffer(Vbo);
         clientContext.Gl.DeleteBuffer(Ebo);
     }
+
+    public ShaderKind GetShader() => ShaderKind.REGULAR;
 }

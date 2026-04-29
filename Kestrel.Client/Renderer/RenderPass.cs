@@ -3,6 +3,7 @@ using Kestrel.Client.ECS;
 using Silk.NET.OpenGL;
 using Arch.Core.Extensions;
 using Kestrel.Client.Mesh;
+using Kestrel.Client.MMath;
 
 namespace Kestrel.Client.Renderer;
 
@@ -17,11 +18,11 @@ public class RenderPass(ClientContext clientContext)
     public uint CameraDepthFbo;
     public uint CameraDepthMap;
     public uint CameraNormalMap;
+    public uint TerrainNoiseMap;
     const uint CameraDepthSize = 10240;
     const uint CameraDepthPreviewSize = 256;
 
 
-    public Shader Shader = null!;
     public Shader SkyShader = null!;
     public Shader DebugDepthShader = null!;
     public Shader DebugTextureShader = null!;
@@ -40,10 +41,11 @@ public class RenderPass(ClientContext clientContext)
         HeightmapDrawInstruction.Setup(clientContext);
 
         Atlas = new Texture(clientContext.Gl, Path.Combine(AppContext.BaseDirectory, "Assets", "atlas.png"));
-        var shadersDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Shaders");
-        Shader = Shader.FromFiles(clientContext.Gl, Path.Combine(shadersDir, "default.vert"), Path.Combine(shadersDir, "default.frag"));
+        TileSize = new Vector2(16f / Atlas.Width, 16f / Atlas.Height);
+        TerrainNoiseMap = CreateTerrainNoiseTexture(HeightmapDrawInstruction.Size);
+        var shadersDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Shaders"); ;
         SkyShader = Shader.FromFiles(clientContext.Gl, Path.Combine(shadersDir, "debug_depth.vert"), Path.Combine(shadersDir, "sky.frag"));
-
+        Shader.SetupRegularShaders(clientContext, shadersDir);
 
         // Shadows
         ShadowFbo = clientContext.Gl.GenFramebuffer();
@@ -195,6 +197,11 @@ public class RenderPass(ClientContext clientContext)
         drawInstructions.Enqueue(new HeightmapDrawInstruction(clientContext, TileSize, translation, atlasPosition));
     }
 
+    public void Draw(IDrawInstruction drawInstruction)
+    {
+        drawInstructions.Enqueue(drawInstruction);
+    }
+
     public void End()
     {
         var size = clientContext.Window.Size;
@@ -264,34 +271,79 @@ public class RenderPass(ClientContext clientContext)
         // Regular
         DrawSky(view, projection);
 
-        Shader.Use();
-        Shader.SetInt("uTexture", 0);
-        Shader.SetInt("uShadowMap", 1);
-        Shader.SetInt("uCameraDepthMap", 2);
-        Shader.SetInt("uCameraNormalMap", 3);
-        Shader.SetInt("uWireframe", 0);
-
-        Atlas.Bind(TextureUnit.Texture0);
-
-        clientContext.Gl.ActiveTexture(TextureUnit.Texture1);
-        clientContext.Gl.BindTexture(TextureTarget.Texture2D, ShadowMap);
-
-        clientContext.Gl.ActiveTexture(TextureUnit.Texture2);
-        clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraDepthMap);
-
-        clientContext.Gl.ActiveTexture(TextureUnit.Texture3);
-        clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraNormalMap);
-
-        Shader.SetMatrix4("uLightView", lightView);
-        Shader.SetMatrix4("uLightProjection", lightProjection);
-        Shader.SetVector3("uSunDirection", Vector3.Normalize(sunPosition - sceneCenter));
-
-        foreach (IDrawInstruction drawInstruction in drawInstructions)
+        foreach (var group in drawInstructions.GroupBy((di) => di.GetShader()))
         {
-            drawInstruction.Draw(view, projection, Shader);
+            Shader shader = Shader.Shaders[group.Key]!;
+            shader.Use();
+            shader.SetInt("uTexture", 0);
+            shader.SetInt("uShadowMap", 1);
+            shader.SetInt("uCameraDepthMap", 2);
+            shader.SetInt("uCameraNormalMap", 3);
+            shader.SetInt("uTerrainNoiseMap", 4);
+            shader.SetInt("uWireframe", 0);
+
+            Atlas.Bind(TextureUnit.Texture0);
+
+            clientContext.Gl.ActiveTexture(TextureUnit.Texture1);
+            clientContext.Gl.BindTexture(TextureTarget.Texture2D, ShadowMap);
+
+            clientContext.Gl.ActiveTexture(TextureUnit.Texture2);
+            clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraDepthMap);
+
+            clientContext.Gl.ActiveTexture(TextureUnit.Texture3);
+            clientContext.Gl.BindTexture(TextureTarget.Texture2D, CameraNormalMap);
+
+            clientContext.Gl.ActiveTexture(TextureUnit.Texture4);
+            clientContext.Gl.BindTexture(TextureTarget.Texture2D, TerrainNoiseMap);
+
+            shader.SetMatrix4("uLightView", lightView);
+            shader.SetMatrix4("uLightProjection", lightProjection);
+            shader.SetVector3("uSunDirection", Vector3.Normalize(sunPosition - sceneCenter));
+
+            foreach (IDrawInstruction drawInstruction in group)
+            {
+                drawInstruction.Draw(view, projection, shader);
+            }
         }
 
         DrawShadowPreview((uint)size.X, (uint)size.Y);
+    }
+
+    unsafe uint CreateTerrainNoiseTexture(int textureSize)
+    {
+        var noise = new FastNoiseLite();
+        noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+        noise.SetFrequency(0.04f);
+
+        byte[] data = new byte[textureSize * textureSize];
+        for (int y = 0; y < textureSize; y++)
+        {
+            for (int x = 0; x < textureSize; x++)
+            {
+                float value = noise.GetNoise(x, y) * 0.5f + 0.5f;
+                data[y * textureSize + x] = (byte)Math.Clamp(value * 255f, 0f, 255f);
+            }
+        }
+
+        uint texture = clientContext.Gl.GenTexture();
+        clientContext.Gl.BindTexture(TextureTarget.Texture2D, texture);
+        fixed (byte* ptr = data)
+            clientContext.Gl.TexImage2D(
+                TextureTarget.Texture2D,
+                0,
+                InternalFormat.R8,
+                (uint)textureSize,
+                (uint)textureSize,
+                0,
+                PixelFormat.Red,
+                PixelType.UnsignedByte,
+                ptr);
+
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        clientContext.Gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        return texture;
     }
 
     void DrawSky(Matrix4x4 view, Matrix4x4 projection)
@@ -355,7 +407,6 @@ public class RenderPass(ClientContext clientContext)
         HeightmapDrawInstruction.CleanUp(clientContext);
 
         Atlas.Dispose();
-        Shader.Dispose();
         SkyShader.Dispose();
         ShadowShader.Dispose();
         DebugDepthShader.Dispose();
@@ -365,6 +416,7 @@ public class RenderPass(ClientContext clientContext)
         clientContext.Gl.DeleteFramebuffer(CameraDepthFbo);
         clientContext.Gl.DeleteTexture(CameraDepthMap);
         clientContext.Gl.DeleteTexture(CameraNormalMap);
+        clientContext.Gl.DeleteTexture(TerrainNoiseMap);
         clientContext.Gl.DeleteVertexArray(DebugQuadVao);
         clientContext.Gl.DeleteBuffer(DebugQuadVbo);
     }

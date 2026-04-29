@@ -3,8 +3,25 @@ using Silk.NET.OpenGL;
 
 namespace Kestrel.Client.Renderer;
 
+public enum ShaderKind
+{
+    REGULAR,
+    GRASS
+}
+
 public class Shader : IDisposable
 {
+    public static Dictionary<ShaderKind, Shader?> Shaders = [];
+
+    public static void SetupRegularShaders(ClientContext clientContext, string shadersDir)
+    {
+        Shaders = new()
+        {
+            [ShaderKind.REGULAR] = FromFiles(clientContext.Gl, Path.Combine(shadersDir, "default.vert"), Path.Combine(shadersDir, "default.frag")),
+            [ShaderKind.GRASS] = FromFiles(clientContext.Gl, Path.Combine(shadersDir, "grass.vert"), Path.Combine(shadersDir, "default.frag"))
+        };
+    }
+
     readonly GL _gl;
     readonly uint _handle;
 

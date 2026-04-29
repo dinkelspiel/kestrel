@@ -15,6 +15,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
     const float JumpSpeed = 12f;
     public Camera camera = null!;
     public RenderPass renderPass = null!;
+    public GrassDrawInstruction grassDrawInstruction = null!;
 
     public override unsafe void Load()
     {
@@ -28,6 +29,9 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 
         renderPass = new(clientContext);
         renderPass.Setup();
+
+        grassDrawInstruction = new(clientContext, renderPass.TileSize, Matrix4x4.Identity, (2, 0), HeightmapDrawInstruction.Heightmap, HeightmapDrawInstruction.Size);
+        grassDrawInstruction.Setup(clientContext);
     }
 
     public override void Update(double dt)
@@ -131,6 +135,8 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         });
 
         renderPass.DrawHeightmap(Matrix4x4.Identity, (0, 0));
+
+        // renderPass.Draw(grassDrawInstruction);
 
         renderPass.End();
     }

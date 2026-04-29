@@ -61,6 +61,7 @@ Mesh/
  BillboardDrawInstruction.cs
  CubeDrawInstruction.cs
  DrawInstruction.cs
+ GrassDrawInstruction.cs
  HeightmapDrawInstruction.cs
 MMath/FastNoiseLite.cs
 obj/Debug/net10.0/

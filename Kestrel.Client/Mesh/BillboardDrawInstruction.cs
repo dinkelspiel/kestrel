@@ -1,4 +1,5 @@
 using System.Numerics;
+using Kestrel.Client.Renderer;
 using Silk.NET.OpenGL;
 
 namespace Kestrel.Client.Mesh;
@@ -61,4 +62,6 @@ public class BillboardDrawInstruction(ClientContext clientContext, Vector2 tileS
         clientContext.Gl.DeleteBuffer(BillboardVbo);
         clientContext.Gl.DeleteBuffer(BillboardEbo);
     }
+
+    public ShaderKind GetShader() => ShaderKind.REGULAR;
 }

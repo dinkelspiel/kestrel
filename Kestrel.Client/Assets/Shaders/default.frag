@@ -10,6 +10,7 @@ uniform sampler2D uTexture;
 uniform sampler2D uShadowMap;
 uniform sampler2D uCameraDepthMap;
 uniform sampler2D uCameraNormalMap;
+uniform sampler2D uTerrainNoiseMap;
 uniform int uIsHeightmap;
 uniform mat4 uView;
 vec3 cameraPos = inverse(uView)[3].xyz;
@@ -90,10 +91,20 @@ void main() {
       normalize(texture(uCameraNormalMap, screenUv).rgb * 2.0 - 1.0);
   float upDot = abs(dot(cameraNormal, vec3(0.0, 1.0, 0.0)));
 
-  if (uIsHeightmap == 1 && upDot < steepNormalThreshold) {
-    color.r = 155.0 / 255.0;
-    color.g = 177.0 / 255.0;
-    color.b = 152.0 / 255.0;
+  if (uIsHeightmap == 1) {
+    if (upDot < steepNormalThreshold) {
+      color.r = 155.0 / 255.0;
+      color.g = 177.0 / 255.0;
+      color.b = 152.0 / 255.0;
+    } else {
+      ivec2 noiseSize = textureSize(uTerrainNoiseMap, 0);
+      ivec2 noiseCoord =
+          clamp(ivec2(floor(vWorldPos.xz)), ivec2(0), noiseSize - ivec2(1));
+      float grassNoise = texelFetch(uTerrainNoiseMap, noiseCoord, 0).r;
+      vec3 grassLow = vec3(153.0 / 255.0, 167.0 / 255.0, 106.0 / 255.0);
+      vec3 grassHigh = vec3(145.0 / 255.0, 161.0 / 255.0, 94.0 / 255.0);
+      color.rgb = mix(grassLow, grassHigh, grassNoise);
+    }
   }
 
   if (uIsHeightmap == 1 && vWorldPos.y < 0.5) {
@@ -116,7 +127,8 @@ void main() {
         vec4(mix(color.rgb, skyColor, clamp(pixelDistanceToCamera, 0, 1)), 1);
   }
 
-  float outline = (vWorldPos.y > 0) ? depthEdge(screenUv) : 0.0;
+  float outline =
+      uIsHeightmap == 1 ? ((vWorldPos.y > 0) ? depthEdge(screenUv) : 0.0) : 0.0;
   FragColor = vec4(mix(color.rgb, color.rgb * 0.8, outline), color.a);
   //   FragColor = vec4(color.rgb * mix(0.8, 1.0, visibility), color.a);
 }
