@@ -33,8 +33,24 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
             return (noise.GetNoise(x, y) + 1) * 24f * falloff;
         }
 
+        Vector3 GetNormal(int x, int y)
+        {
+            float left = GetHeight(Math.Max(x - 1, 0), y);
+            float right = GetHeight(Math.Min(x + 1, size - 1), y);
+            float down = GetHeight(x, Math.Max(y - 1, 0));
+            float up = GetHeight(x, Math.Min(y + 1, size - 1));
+
+            return Vector3.Normalize(new Vector3(left - right, 2f, down - up));
+        }
+
         List<float> verticies = [];
         List<uint> indicies = [];
+
+        void AddVertex(int x, int y, float height)
+        {
+            Vector3 normal = GetNormal(x, y);
+            verticies.AddRange([x, height, y, 0.5f, 0.5f, normal.X, normal.Y, normal.Z]);
+        }
 
         for (int x = 0; x < size - 1; x++)
         {
@@ -44,12 +60,12 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
                 float h01 = GetHeight(x, y + 1);
                 float h10 = GetHeight(x + 1, y);
                 float h11 = GetHeight(x + 1, y + 1);
-                uint i = (uint)(verticies.Count / 5);
+                uint i = (uint)(verticies.Count / 8);
 
-                verticies.AddRange([x, h00, y, 0.5f, 0.5f]);
-                verticies.AddRange([x, h01, y + 1, 0.5f, 0.5f]);
-                verticies.AddRange([x + 1, h10, y, 0.5f, 0.5f]);
-                verticies.AddRange([x + 1, h11, y + 1, 0.5f, 0.5f]);
+                AddVertex(x, y, h00);
+                AddVertex(x, y + 1, h01);
+                AddVertex(x + 1, y, h10);
+                AddVertex(x + 1, y + 1, h11);
 
                 indicies.AddRange([i, i + 1, i + 2]);
                 indicies.AddRange([i + 1, i + 3, i + 2]);
@@ -73,11 +89,13 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
         fixed (uint* i = Indices)
             clientContext.Gl.BufferData(BufferTargetARB.ElementArrayBuffer, (nuint)(Indices.Length * sizeof(uint)), i, BufferUsageARB.StaticDraw);
 
-        const uint stride = 5 * sizeof(float);
+        const uint stride = 8 * sizeof(float);
         clientContext.Gl.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, stride, (void*)0);
         clientContext.Gl.EnableVertexAttribArray(0);
         clientContext.Gl.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, stride, (void*)(3 * sizeof(float)));
         clientContext.Gl.EnableVertexAttribArray(1);
+        clientContext.Gl.VertexAttribPointer(2, 3, VertexAttribPointerType.Float, false, stride, (void*)(5 * sizeof(float)));
+        clientContext.Gl.EnableVertexAttribArray(2);
     }
 
     public unsafe void Draw(Matrix4x4 view, Matrix4x4 projection, Renderer.Shader shader)

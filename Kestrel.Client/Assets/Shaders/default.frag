@@ -20,7 +20,7 @@ vec3 skyColor = vec3(0.588, 0.780, 0.769);
 
 const float outlineThreshold = 0.00008;
 const float outlineWidth = 3.0 / 1024.0;
-const float steepNormalThreshold = 0.85;
+const float steepNormalThreshold = 0.80;
 
 float distanceBetweenPointAndCamera() {
   return sqrt(pow(vWorldPos.x - cameraPos.x, 2) +
