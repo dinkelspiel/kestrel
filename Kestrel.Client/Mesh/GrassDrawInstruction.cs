@@ -58,8 +58,8 @@ public class GrassDrawInstruction(ClientContext clientContext, Vector2 tileSize,
         }
 
         List<Vector3> grassTranslations = [];
-        int start = (int)(size * 0.2f);
-        int end = (int)(size * 0.8f) - 1;
+        int start = 0;
+        int end = size - 1;
 
         Random random = new();
         for (int y = start; y < end; y += 1)
