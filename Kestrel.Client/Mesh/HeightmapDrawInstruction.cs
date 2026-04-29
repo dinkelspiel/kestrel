@@ -18,13 +18,18 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
     [
     ];
 
+    public static float[,] Heightmap;
+    public static int Size;
+
     public static unsafe void Setup(ClientContext clientContext)
     {
         FastNoiseLite noise = new();
         noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-        int size = 712;
-        float center = size * 0.5f;
-        float radius = size * 0.3f;
+        Size = 712;
+        float center = Size * 0.5f;
+        float radius = Size * 0.3f;
+
+        Heightmap = new float[Size, Size];
 
         float GetHeight(int x, int y)
         {
@@ -33,12 +38,21 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
             return (noise.GetNoise(x, y) + 1) * 24f * falloff;
         }
 
+
+        for (int x = 0; x < Size - 1; x++)
+        {
+            for (int y = 0; y < Size - 1; y++)
+            {
+                Heightmap[x, y] = GetHeight(x, y);
+            }
+        }
+
         Vector3 GetNormal(int x, int y)
         {
-            float left = GetHeight(Math.Max(x - 1, 0), y);
-            float right = GetHeight(Math.Min(x + 1, size - 1), y);
-            float down = GetHeight(x, Math.Max(y - 1, 0));
-            float up = GetHeight(x, Math.Min(y + 1, size - 1));
+            float left = Heightmap[Math.Max(x - 1, 0), y];
+            float right = Heightmap[Math.Min(x + 1, Size - 1), y];
+            float down = Heightmap[x, Math.Max(y - 1, 0)];
+            float up = Heightmap[x, Math.Min(y + 1, Size - 1)];
 
             return Vector3.Normalize(new Vector3(left - right, 2f, down - up));
         }
@@ -52,14 +66,14 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
             verticies.AddRange([x, height, y, 0.5f, 0.5f, normal.X, normal.Y, normal.Z]);
         }
 
-        for (int x = 0; x < size - 1; x++)
+        for (int x = 0; x < Size - 1; x++)
         {
-            for (int y = 0; y < size - 1; y++)
+            for (int y = 0; y < Size - 1; y++)
             {
-                float h00 = GetHeight(x, y);
-                float h01 = GetHeight(x, y + 1);
-                float h10 = GetHeight(x + 1, y);
-                float h11 = GetHeight(x + 1, y + 1);
+                float h00 = Heightmap[x, y];
+                float h01 = Heightmap[x, y + 1];
+                float h10 = Heightmap[x + 1, y];
+                float h11 = Heightmap[x + 1, y + 1];
                 uint i = (uint)(verticies.Count / 8);
 
                 AddVertex(x, y, h00);

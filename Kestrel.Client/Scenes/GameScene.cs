@@ -54,7 +54,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
             ref var vel = ref player.Get<VelocityComponent>();
             vel.Velocity.X = wish.X * camera.Speed;
             vel.Velocity.Z = wish.Z * camera.Speed;
-            if (input.IsKeyPressed(Key.Space) && player.Get<TransformComponent>().Postition.Y <= 0f)
+            if (input.IsKeyPressed(Key.Space) && player.Get<TransformComponent>().IsGrounded)
                 vel.Velocity.Y = JumpSpeed;
             // if (input.IsKeyPressed(Key.Space))
             // if (input.IsKeyPressed(Key.ShiftLeft))
@@ -65,13 +65,43 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         clientContext.World.Query(new QueryDescription().WithAll<VelocityComponent, TransformComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
         {
             velocity.Velocity.Y -= Gravity * step;
+        });
+
+        clientContext.World.Query(new QueryDescription().WithAll<TransformComponent, VelocityComponent, HeightmapColliderComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
+        {
+            float[,] heightmap = HeightmapDrawInstruction.Heightmap;
+            int size = HeightmapDrawInstruction.Size;
+
+            Vector3 minCorner3D = transform.Postition - new Vector3(0.5f, 0.5f, 0.5f);
+            Vector3 maxCorner3D = transform.Postition + new Vector3(0.5f, -0.5f, 0.5f);
+            Vector2 extremeMinCorner = new(MathF.Floor(minCorner3D.X), MathF.Floor(minCorner3D.Z));
+            Vector2 extremeMaxCorner = new(MathF.Ceiling(maxCorner3D.X), MathF.Ceiling(maxCorner3D.Z));
+
+            float minHeight = heightmap[(int)extremeMinCorner.X, (int)extremeMinCorner.Y];
+            float maxHeight = heightmap[(int)extremeMaxCorner.X, (int)extremeMaxCorner.Y];
+
+            float lerpedHeight = minHeight + 0.5f * (maxHeight - minHeight);
+
+            if (transform.Postition.Y + velocity.Velocity.Y * step < lerpedHeight + 0.5f)
+            {
+                transform.Postition.Y = lerpedHeight + 0.5f;
+                transform.IsGrounded = true;
+                velocity.Velocity.Y = 0;
+            }
+
+            // renderPass.DrawCube(Matrix4x4.CreateTranslation(new(extremeMinCorner.X, heightmap[(int)extremeMinCorner.X, (int)extremeMinCorner.Y], extremeMinCorner.Y)), (0, 0));
+            // renderPass.DrawCube(Matrix4x4.CreateTranslation(new(extremeMaxCorner.X, heightmap[(int)extremeMaxCorner.X, (int)extremeMaxCorner.Y], extremeMaxCorner.Y)), (0, 0));
+        });
+
+        clientContext.World.Query(new QueryDescription().WithAll<VelocityComponent, TransformComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
+        {
             transform.Postition += velocity.Velocity * step;
 
-            if (transform.Postition.Y < 0f)
-            {
-                transform.Postition.Y = 0f;
-                if (velocity.Velocity.Y < 0f) velocity.Velocity.Y = 0f;
-            }
+            // if (transform.Postition.Y < 0f)
+            // {
+            //     transform.Postition.Y = 0f;
+            //     if (velocity.Velocity.Y < 0f) velocity.Velocity.Y = 0f;
+            // }
         });
     }
 

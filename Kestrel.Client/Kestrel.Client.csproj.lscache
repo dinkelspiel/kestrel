@@ -61,7 +61,7 @@ Mesh/
  BillboardDrawInstruction.cs
  CubeDrawInstruction.cs
  DrawInstruction.cs
- HeightmapMesh.cs
+ HeightmapDrawInstruction.cs
 MMath/FastNoiseLite.cs
 obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs

@@ -2,11 +2,12 @@ using System.Numerics;
 
 namespace Kestrel.Client.ECS;
 
-public struct TransformComponent
+public struct TransformComponent(Vector3 position)
 {
-    public Vector3 Postition;
-    public float Yaw;
-    public float Pitch;
+    public Vector3 Postition = position;
+    public float Yaw = 0;
+    public float Pitch = 0;
+    public bool IsGrounded = false;
 }
 
 public struct VelocityComponent
@@ -15,3 +16,5 @@ public struct VelocityComponent
 }
 
 public struct PlayerTag;
+
+public struct HeightmapColliderComponent;
