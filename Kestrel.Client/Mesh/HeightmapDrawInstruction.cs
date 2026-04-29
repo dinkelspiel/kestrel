@@ -18,7 +18,7 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
     [
     ];
 
-    public static float[,] Heightmap;
+    public static float[,] Heightmap = null!;
     public static int Size;
 
     public static unsafe void Setup(ClientContext clientContext)

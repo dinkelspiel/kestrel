@@ -12,7 +12,7 @@ public class Camera(ClientContext clientContext)
     public float LastMouseX, LastMouseY;
     public bool FirstMouse = true;
     public float Sensitivity = 0.1f;
-    public float Speed = 32f;
+    public float Speed = 36f;
     public float CameraDistance = 4.5f;
     public float CameraShoulderOffset = 1.5f;
     public float CameraHeightOffset = 1.5f;

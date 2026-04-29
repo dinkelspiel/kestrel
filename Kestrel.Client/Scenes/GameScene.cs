@@ -4,12 +4,8 @@ using Arch.Core.Extensions;
 using Kestrel.Client.ECS;
 using Kestrel.Client.Mesh;
 using Kestrel.Client.Renderer;
-using Kestrel.Client.Renderer;
 using Kestrel.Client.Scene;
 using Silk.NET.Input;
-using Silk.NET.OpenGL;
-using Shader = Kestrel.Client.Renderer.Shader;
-using Texture = Kestrel.Client.Renderer.Texture;
 
 namespace Kestrel.Client.Scenes;
 
@@ -17,8 +13,8 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 {
     const float Gravity = 25f;
     const float JumpSpeed = 12f;
-    public Camera camera;
-    public RenderPass renderPass;
+    public Camera camera = null!;
+    public RenderPass renderPass = null!;
 
     public override unsafe void Load()
     {
@@ -64,6 +60,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 
         clientContext.World.Query(new QueryDescription().WithAll<VelocityComponent, TransformComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
         {
+            transform.IsGrounded = false;
             velocity.Velocity.Y -= Gravity * step;
         });
 
@@ -71,38 +68,45 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         {
             float[,] heightmap = HeightmapDrawInstruction.Heightmap;
             int size = HeightmapDrawInstruction.Size;
+            var nextPosition = transform.Postition + velocity.Velocity * step;
+            float groundHeight = SampleHeight(heightmap, size, nextPosition.X, nextPosition.Z) + 0.5f;
 
-            Vector3 minCorner3D = transform.Postition - new Vector3(0.5f, 0.5f, 0.5f);
-            Vector3 maxCorner3D = transform.Postition + new Vector3(0.5f, -0.5f, 0.5f);
-            Vector2 extremeMinCorner = new(MathF.Floor(minCorner3D.X), MathF.Floor(minCorner3D.Z));
-            Vector2 extremeMaxCorner = new(MathF.Ceiling(maxCorner3D.X), MathF.Ceiling(maxCorner3D.Z));
-
-            float minHeight = heightmap[(int)extremeMinCorner.X, (int)extremeMinCorner.Y];
-            float maxHeight = heightmap[(int)extremeMaxCorner.X, (int)extremeMaxCorner.Y];
-
-            float lerpedHeight = minHeight + 0.5f * (maxHeight - minHeight);
-
-            if (transform.Postition.Y + velocity.Velocity.Y * step < lerpedHeight + 0.5f)
+            if (nextPosition.Y < groundHeight)
             {
-                transform.Postition.Y = lerpedHeight + 0.5f;
+                nextPosition.Y = groundHeight;
                 transform.IsGrounded = true;
-                velocity.Velocity.Y = 0;
+                if (velocity.Velocity.Y < 0f)
+                    velocity.Velocity.Y = 0f;
             }
 
-            // renderPass.DrawCube(Matrix4x4.CreateTranslation(new(extremeMinCorner.X, heightmap[(int)extremeMinCorner.X, (int)extremeMinCorner.Y], extremeMinCorner.Y)), (0, 0));
-            // renderPass.DrawCube(Matrix4x4.CreateTranslation(new(extremeMaxCorner.X, heightmap[(int)extremeMaxCorner.X, (int)extremeMaxCorner.Y], extremeMaxCorner.Y)), (0, 0));
+            transform.Postition = nextPosition;
         });
 
-        clientContext.World.Query(new QueryDescription().WithAll<VelocityComponent, TransformComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
+        clientContext.World.Query(new QueryDescription().WithAll<VelocityComponent, TransformComponent>().WithNone<HeightmapColliderComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
         {
             transform.Postition += velocity.Velocity * step;
-
-            // if (transform.Postition.Y < 0f)
-            // {
-            //     transform.Postition.Y = 0f;
-            //     if (velocity.Velocity.Y < 0f) velocity.Velocity.Y = 0f;
-            // }
         });
+    }
+
+    static float SampleHeight(float[,] heightmap, int size, float x, float y)
+    {
+        x = Math.Clamp(x, 0f, size - 1f);
+        y = Math.Clamp(y, 0f, size - 1f);
+
+        int x0 = (int)MathF.Floor(x);
+        int y0 = (int)MathF.Floor(y);
+        int x1 = Math.Min(x0 + 1, size - 1);
+        int y1 = Math.Min(y0 + 1, size - 1);
+        float tx = x - x0;
+        float ty = y - y0;
+
+        float h00 = heightmap[x0, y0];
+        float h10 = heightmap[x1, y0];
+        float h01 = heightmap[x0, y1];
+        float h11 = heightmap[x1, y1];
+        float hx0 = h00 + (h10 - h00) * tx;
+        float hx1 = h01 + (h11 - h01) * tx;
+        return hx0 + (hx1 - hx0) * ty;
     }
 
     public override void Render(double dt)
