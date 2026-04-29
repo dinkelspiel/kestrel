@@ -101,6 +101,7 @@ public class GrassDrawInstruction(ClientContext clientContext, Vector2 tileSize,
         shader.SetVector2("uTileOffset", new Vector2(tileSize.X * atlasPosition.X, tileSize.Y * atlasPosition.Y));
         shader.SetVector2("uTileSize", tileSize);
         shader.SetInt("uIsHeightmap", 0);
+        shader.SetInt("uIsGrass", 1);
         shader.SetMatrix4("uModel", translation * clientContext.camera.GetViewRotation());
         clientContext.Gl.DrawElementsInstanced(PrimitiveType.Triangles, (uint)Indices.Length, DrawElementsType.UnsignedInt, null, (uint)translations.Length);
     }

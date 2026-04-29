@@ -84,6 +84,7 @@ public class CubeDrawInstruction(ClientContext clientContext, Vector2 tileSize, 
         shader.SetVector2("uTileOffset", new Vector2(tileSize.X * atlasPosition.X, tileSize.Y * atlasPosition.Y));
         shader.SetVector2("uTileSize", tileSize);
         shader.SetInt("uIsHeightmap", 0);
+        shader.SetInt("uIsGrass", 0);
         shader.SetMatrix4("uModel", translation);
         clientContext.Gl.DrawElements(PrimitiveType.Triangles, (uint)Indices.Length, DrawElementsType.UnsignedInt, null);
     }

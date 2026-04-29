@@ -136,7 +136,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 
         renderPass.DrawHeightmap(Matrix4x4.Identity, (0, 0));
 
-        // renderPass.Draw(grassDrawInstruction);
+        renderPass.Draw(grassDrawInstruction);
 
         renderPass.End();
     }

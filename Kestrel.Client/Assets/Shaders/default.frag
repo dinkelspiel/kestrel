@@ -12,6 +12,7 @@ uniform sampler2D uCameraDepthMap;
 uniform sampler2D uCameraNormalMap;
 uniform sampler2D uTerrainNoiseMap;
 uniform int uIsHeightmap;
+uniform int uIsGrass;
 uniform mat4 uView;
 vec3 cameraPos = inverse(uView)[3].xyz;
 float fogNear = 80;
@@ -51,6 +52,16 @@ float depthEdge(vec2 uv) {
       max(max(abs(d - d1), abs(d - d2)), max(abs(d - d3), abs(d - d4)));
   float threshold = max(0.35, d * 0.025);
   return maxDiff > threshold ? 1.0 : 0.0;
+}
+
+vec3 grassVariation() {
+  ivec2 noiseSize = textureSize(uTerrainNoiseMap, 0);
+  ivec2 noiseCoord =
+      clamp(ivec2(floor(vWorldPos.xz)), ivec2(0), noiseSize - ivec2(1));
+  float grassNoise = texelFetch(uTerrainNoiseMap, noiseCoord, 0).r;
+  vec3 grassLow = vec3(153.0 / 255.0, 167.0 / 255.0, 106.0 / 255.0);
+  vec3 grassHigh = vec3(145.0 / 255.0, 161.0 / 255.0, 94.0 / 255.0);
+  return mix(grassLow, grassHigh, grassNoise);
 }
 uniform vec3 uSunDirection;
 uniform int uWireframe;
@@ -97,14 +108,12 @@ void main() {
       color.g = 177.0 / 255.0;
       color.b = 152.0 / 255.0;
     } else {
-      ivec2 noiseSize = textureSize(uTerrainNoiseMap, 0);
-      ivec2 noiseCoord =
-          clamp(ivec2(floor(vWorldPos.xz)), ivec2(0), noiseSize - ivec2(1));
-      float grassNoise = texelFetch(uTerrainNoiseMap, noiseCoord, 0).r;
-      vec3 grassLow = vec3(153.0 / 255.0, 167.0 / 255.0, 106.0 / 255.0);
-      vec3 grassHigh = vec3(145.0 / 255.0, 161.0 / 255.0, 94.0 / 255.0);
-      color.rgb = mix(grassLow, grassHigh, grassNoise);
+      color.rgb = grassVariation();
     }
+  }
+
+  if (uIsGrass == 1) {
+    color.rgb = grassVariation();
   }
 
   if (uIsHeightmap == 1 && vWorldPos.y < 0.5) {

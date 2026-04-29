@@ -122,6 +122,7 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
         shader.SetVector2("uTileOffset", new Vector2(tileSize.X * atlasPosition.X, tileSize.Y * atlasPosition.Y));
         shader.SetVector2("uTileSize", tileSize);
         shader.SetInt("uIsHeightmap", 1);
+        shader.SetInt("uIsGrass", 0);
         shader.SetMatrix4("uModel", translation);
         clientContext.Gl.DrawElements(PrimitiveType.Triangles, (uint)Indices.Length, DrawElementsType.UnsignedInt, null);
     }

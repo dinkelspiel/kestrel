@@ -52,6 +52,7 @@ public class BillboardDrawInstruction(ClientContext clientContext, Vector2 tileS
         shader.SetVector2("uTileOffset", new Vector2(tileSize.X * atlasPosition.X, tileSize.Y * atlasPosition.Y));
         shader.SetVector2("uTileSize", tileSize);
         shader.SetInt("uIsHeightmap", 0);
+        shader.SetInt("uIsGrass", 0);
         shader.SetMatrix4("uModel", translation * clientContext.camera.GetViewRotation());
         clientContext.Gl.DrawElements(PrimitiveType.Triangles, (uint)BillboardIndices.Length, DrawElementsType.UnsignedInt, null);
     }
