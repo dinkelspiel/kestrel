@@ -262,6 +262,9 @@ public class RenderPass(ClientContext clientContext)
 
         foreach (IDrawInstruction drawInstruction in drawInstructions)
         {
+            if (drawInstruction is not ModelDrawInstruction)
+                Atlas.Bind(TextureUnit.Texture0);
+
             drawInstruction.Draw(view, projection, ShadowShader);
         }
 
@@ -302,6 +305,9 @@ public class RenderPass(ClientContext clientContext)
 
             foreach (IDrawInstruction drawInstruction in group)
             {
+                if (drawInstruction is not ModelDrawInstruction)
+                    Atlas.Bind(TextureUnit.Texture0);
+
                 drawInstruction.Draw(view, projection, shader);
             }
         }

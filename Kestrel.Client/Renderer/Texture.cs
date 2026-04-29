@@ -33,6 +33,26 @@ public class Texture : IDisposable
         _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
     }
 
+    public unsafe Texture(GL gl, byte[] rgba, int width, int height)
+    {
+        _gl = gl;
+        Width = width;
+        Height = height;
+
+        _handle = _gl.GenTexture();
+        Bind();
+
+        fixed (byte* ptr = rgba)
+            _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba,
+                (uint)Width, (uint)Height, 0,
+                PixelFormat.Rgba, PixelType.UnsignedByte, ptr);
+
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+    }
+
     public void Bind(TextureUnit unit = TextureUnit.Texture0)
     {
         _gl.ActiveTexture(unit);

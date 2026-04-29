@@ -16,6 +16,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
     public Camera camera = null!;
     public RenderPass renderPass = null!;
     public GrassDrawInstruction grassDrawInstruction = null!;
+    public ModelDrawInstruction playerModel = null!;
 
     public override unsafe void Load()
     {
@@ -32,6 +33,9 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 
         grassDrawInstruction = new(clientContext, renderPass.TileSize, Matrix4x4.Identity, (2, 0), HeightmapDrawInstruction.Heightmap, HeightmapDrawInstruction.Size);
         grassDrawInstruction.Setup(clientContext);
+        playerModel = new(
+            clientContext,
+            Path.Combine(AppContext.BaseDirectory, "Assets", "player.obj"));
     }
 
     public override void Update(double dt)
@@ -106,8 +110,9 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         clientContext.World.Query(new QueryDescription().WithAll<PlayerTag, TransformComponent>(), (ref TransformComponent transform) =>
         {
             float pYawRad = MathF.PI / 180f * transform.Yaw;
-            var model = Matrix4x4.CreateRotationY(MathF.PI - pYawRad) * Matrix4x4.CreateTranslation(transform.Postition);
-            renderPass.DrawCube(model, (1, 0));
+            var model = Matrix4x4.CreateScale(0.4f) * Matrix4x4.CreateRotationY(MathF.PI - pYawRad + MathF.PI / 2 + MathF.PI) * Matrix4x4.CreateTranslation(transform.Postition);
+            playerModel.Transform = model;
+            renderPass.Draw(playerModel);
         });
 
         renderPass.DrawHeightmap(Matrix4x4.Identity, (0, 0));
@@ -120,6 +125,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
     public override void Unload()
     {
         clientContext.Mouse.MouseMove -= OnMouseMove;
+        playerModel.Dispose();
         renderPass.CleanUp();
     }
 
