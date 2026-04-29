@@ -60,23 +60,27 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 
         clientContext.World.Query(new QueryDescription().WithAll<VelocityComponent, TransformComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
         {
-            transform.IsGrounded = false;
             velocity.Velocity.Y -= Gravity * step;
         });
 
         clientContext.World.Query(new QueryDescription().WithAll<TransformComponent, VelocityComponent, HeightmapColliderComponent>(), (ref TransformComponent transform, ref VelocityComponent velocity) =>
         {
+            bool wasGrounded = transform.IsGrounded;
+            transform.IsGrounded = false;
+
             float[,] heightmap = HeightmapDrawInstruction.Heightmap;
             int size = HeightmapDrawInstruction.Size;
             var nextPosition = transform.Postition + velocity.Velocity * step;
             float groundHeight = SampleHeight(heightmap, size, nextPosition.X, nextPosition.Z) + 0.5f;
 
-            if (nextPosition.Y < groundHeight)
+            float maxStepDown = 1.5f;
+            bool canStickToGround = wasGrounded && velocity.Velocity.Y <= 0f;
+
+            if (nextPosition.Y < groundHeight || (canStickToGround && nextPosition.Y - groundHeight <= maxStepDown))
             {
                 nextPosition.Y = groundHeight;
                 transform.IsGrounded = true;
-                if (velocity.Velocity.Y < 0f)
-                    velocity.Velocity.Y = 0f;
+                velocity.Velocity.Y = 0f;
             }
 
             transform.Postition = nextPosition;
