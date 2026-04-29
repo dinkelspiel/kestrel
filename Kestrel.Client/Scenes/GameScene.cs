@@ -94,6 +94,9 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 
     static float SampleHeight(float[,] heightmap, int size, float x, float y)
     {
+        if (size <= 0)
+            return 0f;
+
         x = Math.Clamp(x, 0f, size - 1f);
         y = Math.Clamp(y, 0f, size - 1f);
 

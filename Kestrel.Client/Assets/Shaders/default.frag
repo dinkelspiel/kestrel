@@ -18,9 +18,10 @@ float fogFar = 150;
 vec3 skyColor = vec3(0.588, 0.780, 0.769);
 // vec3 skyColor = vec3(1, 0, 0);
 
-const float outlineThreshold = 0.00008;
-const float outlineWidth = 3.0 / 1024.0;
+const float outlineWidth = 12.0;
 const float steepNormalThreshold = 0.80;
+const float depthNear = 0.1;
+const float depthFar = 1000.0;
 
 float distanceBetweenPointAndCamera() {
   return sqrt(pow(vWorldPos.x - cameraPos.x, 2) +
@@ -28,15 +29,27 @@ float distanceBetweenPointAndCamera() {
               pow(vWorldPos.z - cameraPos.z, 2));
 }
 
+float linearizeDepth(float depth) {
+  float z = depth * 2.0 - 1.0;
+  return (2.0 * depthNear * depthFar) /
+         (depthFar + depthNear - z * (depthFar - depthNear));
+}
+
 float depthEdge(vec2 uv) {
-  float d = texture(uCameraDepthMap, uv).r;
-  float d1 = texture(uCameraDepthMap, uv + vec2(outlineWidth, 0.0)).r;
-  float d2 = texture(uCameraDepthMap, uv + vec2(-outlineWidth, 0.0)).r;
-  float d3 = texture(uCameraDepthMap, uv + vec2(0.0, outlineWidth)).r;
-  float d4 = texture(uCameraDepthMap, uv + vec2(0.0, -outlineWidth)).r;
+  vec2 texel = outlineWidth / vec2(textureSize(uCameraDepthMap, 0));
+  float d = linearizeDepth(texture(uCameraDepthMap, uv).r);
+  float d1 =
+      linearizeDepth(texture(uCameraDepthMap, uv + vec2(texel.x, 0.0)).r);
+  float d2 =
+      linearizeDepth(texture(uCameraDepthMap, uv + vec2(-texel.x, 0.0)).r);
+  float d3 =
+      linearizeDepth(texture(uCameraDepthMap, uv + vec2(0.0, texel.y)).r);
+  float d4 =
+      linearizeDepth(texture(uCameraDepthMap, uv + vec2(0.0, -texel.y)).r);
   float maxDiff =
       max(max(abs(d - d1), abs(d - d2)), max(abs(d - d3), abs(d - d4)));
-  return maxDiff > outlineThreshold ? 1.0 : 0.0;
+  float threshold = max(0.35, d * 0.025);
+  return maxDiff > threshold ? 1.0 : 0.0;
 }
 uniform vec3 uSunDirection;
 uniform int uWireframe;
