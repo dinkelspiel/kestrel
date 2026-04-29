@@ -22,6 +22,30 @@ public class HeightmapDrawInstruction(ClientContext clientContext, Vector2 tileS
     public static float[,] Heightmap = null!;
     public static int Size;
 
+    public static float SampleHeight(float[,] heightmap, int size, float x, float y)
+    {
+        if (size <= 0)
+            return 0f;
+
+        x = Math.Clamp(x, 0f, size - 1f);
+        y = Math.Clamp(y, 0f, size - 1f);
+
+        int x0 = (int)MathF.Floor(x);
+        int y0 = (int)MathF.Floor(y);
+        int x1 = Math.Min(x0 + 1, size - 1);
+        int y1 = Math.Min(y0 + 1, size - 1);
+        float tx = x - x0;
+        float ty = y - y0;
+
+        float h00 = heightmap[x0, y0];
+        float h10 = heightmap[x1, y0];
+        float h01 = heightmap[x0, y1];
+        float h11 = heightmap[x1, y1];
+        float hx0 = h00 + (h10 - h00) * tx;
+        float hx1 = h01 + (h11 - h01) * tx;
+        return hx0 + (hx1 - hx0) * ty;
+    }
+
     public static unsafe void Setup(ClientContext clientContext)
     {
         FastNoiseLite noise = new();

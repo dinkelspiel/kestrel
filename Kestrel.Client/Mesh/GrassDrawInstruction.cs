@@ -1,4 +1,5 @@
 using System.Numerics;
+using Kestrel.Client.MMath;
 using Kestrel.Client.Renderer;
 using Silk.NET.OpenGL;
 
@@ -65,8 +66,8 @@ public class GrassDrawInstruction(ClientContext clientContext, Vector2 tileSize,
         {
             for (int x = start; x < end; x += 1)
             {
-                if ((x + y) % 3 != 0)
-                    continue;
+                // if ((x + y) % 3 != 0)
+                //     continue;
 
                 if (heightmap[x, y] - 0.5f < 0)
                     continue;
@@ -75,7 +76,9 @@ public class GrassDrawInstruction(ClientContext clientContext, Vector2 tileSize,
                 if (upDot < SteepNormalThreshold)
                     continue;
 
-                Vector3 translation = new(x + (((float)random.NextDouble() - 0.5f) * 2.0f), heightmap[x, y] + 0.25f, y + (((float)random.NextDouble() - 0.5f) * 2.0f));
+                float grassX = x + (((float)random.NextDouble() - 0.5f) * 2.0f);
+                float grassZ = y + (((float)random.NextDouble() - 0.5f) * 2.0f);
+                Vector3 translation = new(grassX, HeightmapDrawInstruction.SampleHeight(heightmap, size, grassX, grassZ) + 0.5f, grassZ);
                 grassTranslations.Add(translation);
             }
         }

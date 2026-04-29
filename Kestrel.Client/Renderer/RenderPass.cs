@@ -321,6 +321,10 @@ public class RenderPass(ClientContext clientContext)
             for (int x = 0; x < textureSize; x++)
             {
                 float value = noise.GetNoise(x, y) * 0.5f + 0.5f;
+                // if (value > 0.5)
+                //     data[y * textureSize + x] = 255;
+                // else
+                //     data[y * textureSize + x] = 0;
                 data[y * textureSize + x] = (byte)Math.Clamp(value * 255f, 0f, 255f);
             }
         }
