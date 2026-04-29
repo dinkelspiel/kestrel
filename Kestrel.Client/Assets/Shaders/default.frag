@@ -136,8 +136,9 @@ void main() {
         vec4(mix(color.rgb, skyColor, clamp(pixelDistanceToCamera, 0, 1)), 1);
   }
 
-  float outline =
-      uIsHeightmap == 1 ? ((vWorldPos.y > 0) ? depthEdge(screenUv) : 0.0) : 0.0;
+  float outline = (uIsHeightmap == 1 && false)
+                      ? ((vWorldPos.y > 0) ? depthEdge(screenUv) : 0.0)
+                      : 0.0;
   FragColor = vec4(mix(color.rgb, color.rgb * 0.8, outline), color.a);
   //   FragColor = vec4(color.rgb * mix(0.8, 1.0, visibility), color.a);
 }
