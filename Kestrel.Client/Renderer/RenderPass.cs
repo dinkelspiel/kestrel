@@ -312,7 +312,7 @@ public class RenderPass(ClientContext clientContext)
             }
         }
 
-        DrawShadowPreview((uint)size.X, (uint)size.Y);
+        // DrawShadowPreview((uint)size.X, (uint)size.Y);
     }
 
     unsafe uint CreateTerrainNoiseTexture(int textureSize)

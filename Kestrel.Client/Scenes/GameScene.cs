@@ -110,7 +110,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         clientContext.World.Query(new QueryDescription().WithAll<PlayerTag, TransformComponent>(), (ref TransformComponent transform) =>
         {
             float pYawRad = MathF.PI / 180f * transform.Yaw;
-            var model = Matrix4x4.CreateScale(0.4f) * Matrix4x4.CreateRotationY(MathF.PI - pYawRad + MathF.PI / 2 + MathF.PI) * Matrix4x4.CreateTranslation(transform.Postition);
+            var model = Matrix4x4.CreateScale(0.3f) * Matrix4x4.CreateRotationY(MathF.PI - pYawRad + MathF.PI / 2 + MathF.PI) * Matrix4x4.CreateTranslation(transform.Postition);
             playerModel.Transform = model;
             renderPass.Draw(playerModel);
         });

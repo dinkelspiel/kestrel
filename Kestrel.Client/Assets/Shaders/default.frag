@@ -15,8 +15,8 @@ uniform int uIsHeightmap;
 uniform int uIsGrass;
 uniform mat4 uView;
 vec3 cameraPos = inverse(uView)[3].xyz;
-float fogNear = 80;
-float fogFar = 150;
+float fogNear = 120;
+float fogFar = 170;
 vec3 skyColor = vec3(0.588, 0.780, 0.769);
 // vec3 skyColor = vec3(1, 0, 0);
 

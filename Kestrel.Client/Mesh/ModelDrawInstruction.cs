@@ -148,7 +148,7 @@ public class ModelDrawInstruction : IDrawInstruction, IDisposable
         if (parts.Length > 1 && parts[1].Length > 0)
         {
             int texCoordIndex = ResolveIndex(parts[1], texCoords.Count);
-            texCoord = texCoords[texCoordIndex];
+            texCoord = new Vector2(texCoords[texCoordIndex].X, 1f - texCoords[texCoordIndex].Y);
         }
 
         uint index = (uint)(vertexData.Count / 5);
