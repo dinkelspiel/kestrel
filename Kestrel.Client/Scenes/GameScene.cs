@@ -35,7 +35,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         grassDrawInstruction.Setup(clientContext);
         playerModel = new(
             clientContext,
-            Path.Combine(AppContext.BaseDirectory, "Assets", "player.obj"));
+            Path.Combine(AppContext.BaseDirectory, "Assets", "player.obj"), Path.Combine(AppContext.BaseDirectory, "Assets", "player.png"));
     }
 
     public override void Update(double dt)
