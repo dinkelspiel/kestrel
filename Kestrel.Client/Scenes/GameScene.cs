@@ -17,7 +17,8 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
     public Camera camera = null!;
     public RenderPass renderPass = null!;
     public GrassDrawInstruction grassDrawInstruction = null!;
-    public ModelDrawInstruction playerModel = null!;
+    public Entity? Player = null;
+    public Entity? Tree = null;
 
     public override unsafe void Load()
     {
@@ -34,12 +35,12 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
 
         grassDrawInstruction = new(clientContext, renderPass.TileSize, Matrix4x4.Identity, (2, 0), HeightmapDrawInstruction.Heightmap, HeightmapDrawInstruction.Size);
         grassDrawInstruction.Setup(clientContext);
-        playerModel = new(
-            clientContext,
-            Path.Combine(AppContext.BaseDirectory, "Assets", "tree.obj"), Path.Combine(AppContext.BaseDirectory, "Assets", "tree.png"));
-
         var prefabsDir = Path.Combine(AppContext.BaseDirectory, "Assets", "Prefabs", "Player.pfb");
         PrefabConfig.FromFile(prefabsDir);
+
+        Player = clientContext.World.Create(new PlayerTag(), new TransformComponent(new(220, 0, 220), 0.4f), new VelocityComponent(), new HeightmapColliderComponent(), new ModelRendererComponent(new(clientContext, Path.Combine(AppContext.BaseDirectory, "Assets", "player.obj"), Path.Combine(AppContext.BaseDirectory, "Assets", "player.png"))));
+        Tree = clientContext.World.Create(new TransformComponent(new(220, HeightmapDrawInstruction.Heightmap[220, 220], 220)), new ModelRendererComponent(new(clientContext, Path.Combine(AppContext.BaseDirectory, "Assets", "tree.obj"), Path.Combine(AppContext.BaseDirectory, "Assets", "tree.png"))));
+        clientContext.Player = Player;
     }
 
     public override void Update(double dt)
@@ -108,15 +109,15 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
     {
         var gl = clientContext.Gl;
         renderPass.Begin();
-        renderPass.DrawCube(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, -1, 0), (0, 0));
-        renderPass.DrawBillboard(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, 0, 0), (2, 0));
+        // renderPass.DrawCube(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, -1, 0), (0, 0));
+        // renderPass.DrawBillboard(Matrix4x4.Identity * Matrix4x4.CreateTranslation(0, 0, 0), (2, 0));
 
-        clientContext.World.Query(new QueryDescription().WithAll<PlayerTag, TransformComponent>(), (ref TransformComponent transform) =>
+        clientContext.World.Query(new QueryDescription().WithAll<ModelRendererComponent, TransformComponent>(), (ref TransformComponent transform, ref ModelRendererComponent modelRenderer) =>
         {
             float pYawRad = MathF.PI / 180f * transform.Yaw;
-            var model = Matrix4x4.CreateScale(0.15f) * Matrix4x4.CreateRotationY(MathF.PI - pYawRad + MathF.PI / 2 + MathF.PI) * Matrix4x4.CreateTranslation(transform.Postition);
-            playerModel.Transform = model;
-            renderPass.Draw(playerModel);
+            var model = Matrix4x4.CreateScale(transform.Scale) * Matrix4x4.CreateRotationY(MathF.PI - pYawRad + MathF.PI / 2 + MathF.PI) * Matrix4x4.CreateTranslation(transform.Postition);
+            modelRenderer.Model.Transform = model;
+            renderPass.Draw(modelRenderer.Model);
         });
 
         renderPass.DrawHeightmap(Matrix4x4.Identity, (0, 0));
@@ -129,8 +130,12 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
     public override void Unload()
     {
         clientContext.Mouse.MouseMove -= OnMouseMove;
-        playerModel.Dispose();
         renderPass.CleanUp();
+
+        // clientContext.World.Query(new QueryDescription().WithAll<ModelRendererComponent>(), (ref ModelRendererComponent modelRenderer) =>
+        // {
+        //     modelRenderer.Model.Dispose();
+        // });
     }
 
     void OnMouseMove(IMouse mouse, Vector2 position)

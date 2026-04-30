@@ -19,15 +19,13 @@ public class ClientContext
     public IMouse Mouse = null!;
     public Input.Input Input = null!;
     public Camera camera = null!;
+    public Entity? Player = null;
 
     public World World { get; private set; } = World.Create();
-    public Entity? Player { get; set; }
 
     public ClientContext()
     {
         sceneManager = new(this);
-        Player = World.Create(new PlayerTag(), new TransformComponent(new(220, 0, 220)), new VelocityComponent(), new HeightmapColliderComponent());
-        // Player = World.Create(new TransformComponent(new(220, 0, 220)), new VelocityComponent(), new ModelRendererComponent(new Mesh.ModelDrawInstruction(clientContext, "")));
     }
 
     public bool TryGetPlayer(out Entity player)

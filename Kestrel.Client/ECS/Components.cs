@@ -3,11 +3,12 @@ using Kestrel.Client.Mesh;
 
 namespace Kestrel.Client.ECS;
 
-public struct TransformComponent(Vector3 position)
+public struct TransformComponent(Vector3 position, float scale = 1)
 {
     public Vector3 Postition = position;
     public float Yaw = 0;
     public float Pitch = 0;
+    public float Scale = scale;
     public bool IsGrounded = false;
 }
 
