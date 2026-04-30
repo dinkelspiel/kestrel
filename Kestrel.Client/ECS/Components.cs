@@ -1,4 +1,5 @@
 using System.Numerics;
+using Kestrel.Client.Mesh;
 
 namespace Kestrel.Client.ECS;
 
@@ -18,3 +19,8 @@ public struct VelocityComponent
 public struct PlayerTag;
 
 public struct HeightmapColliderComponent;
+
+public struct ModelRendererComponent(ModelDrawInstruction model)
+{
+    public ModelDrawInstruction Model = model;
+}

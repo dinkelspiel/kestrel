@@ -69,6 +69,7 @@ obj/Debug/net10.0/
  .NETCoreApp,Version=v10.0.AssemblyAttributes.cs
  Kestrel.Client.AssemblyInfo.cs
  Kestrel.Client.GlobalUsings.g.cs
+Prefab/PrefabConfig.cs
 Program.cs
 Renderer/
  Atlas.cs

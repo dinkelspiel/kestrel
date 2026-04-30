@@ -1,0 +1,20 @@
+mesh = {
+    mesh = "player.obj"
+    texture = "player.png"
+    test = "test testsson"
+    position = {
+        x = 0
+        y = 0
+        z = 0
+    }
+}
+components = {
+    PlayerTag
+    TransformComponent = { 
+        x = 220
+        y = 0
+        z = 220
+    }
+    VelocityComponent
+    HeightmapColliderComponent
+}
