@@ -8,7 +8,8 @@ namespace Kestrel.Client.Mesh;
 public class ModelDrawInstruction : IDrawInstruction, IDisposable
 {
     readonly ClientContext clientContext;
-    readonly Renderer.Texture texture;
+    readonly List<ModelPart> modelParts = [];
+    readonly List<Renderer.Texture> textures = [];
     readonly uint vao;
     readonly uint vbo;
     readonly uint ebo;
@@ -30,12 +31,10 @@ public class ModelDrawInstruction : IDrawInstruction, IDisposable
     {
         this.clientContext = clientContext;
         Transform = transform;
-        texture = texturePath is null
-            ? new Renderer.Texture(clientContext.Gl, [255, 255, 255, 255], 1, 1)
-            : new Renderer.Texture(clientContext.Gl, texturePath);
 
-        LoadObj(objPath, out float[] vertices, out uint[] indices);
+        LoadObj(objPath, out float[] vertices, out uint[] indices, out List<ObjPart> objParts, out Dictionary<string, string> materialTextures);
         indexCount = (uint)indices.Length;
+        LoadTextures(texturePath, objParts, materialTextures);
 
         vao = clientContext.Gl.GenVertexArray();
         clientContext.Gl.BindVertexArray(vao);
@@ -67,9 +66,19 @@ public class ModelDrawInstruction : IDrawInstruction, IDisposable
         shader.SetInt("uIsGrass", 0);
         shader.SetMatrix4("uModel", Transform);
 
-        texture.Bind(TextureUnit.Texture0);
         clientContext.Gl.BindVertexArray(vao);
-        clientContext.Gl.DrawElements(PrimitiveType.Triangles, indexCount, DrawElementsType.UnsignedInt, null);
+        foreach (var part in modelParts)
+        {
+            bool cullFaceEnabled = clientContext.Gl.IsEnabled(EnableCap.CullFace);
+            if (part.TwoSided && cullFaceEnabled)
+                clientContext.Gl.Disable(EnableCap.CullFace);
+
+            part.Texture.Bind(TextureUnit.Texture0);
+            clientContext.Gl.DrawElements(PrimitiveType.Triangles, part.IndexCount, DrawElementsType.UnsignedInt, (void*)(part.IndexStart * sizeof(uint)));
+
+            if (part.TwoSided && cullFaceEnabled)
+                clientContext.Gl.Enable(EnableCap.CullFace);
+        }
     }
 
     public ShaderKind GetShader() => ShaderKind.REGULAR;
@@ -79,19 +88,69 @@ public class ModelDrawInstruction : IDrawInstruction, IDisposable
         clientContext.Gl.DeleteVertexArray(vao);
         clientContext.Gl.DeleteBuffer(vbo);
         clientContext.Gl.DeleteBuffer(ebo);
-        texture.Dispose();
+        foreach (var texture in textures)
+            texture.Dispose();
         GC.SuppressFinalize(this);
     }
 
     public void CleanUp() => Dispose();
 
-    static void LoadObj(string path, out float[] vertices, out uint[] indices)
+    void LoadTextures(string? texturePath, List<ObjPart> objParts, Dictionary<string, string> materialTextures)
+    {
+        if (texturePath is not null)
+        {
+            var texture = new Renderer.Texture(clientContext.Gl, texturePath);
+            textures.Add(texture);
+            modelParts.Add(new ModelPart(texture, 0, indexCount));
+            return;
+        }
+
+        var whiteTexture = new Renderer.Texture(clientContext.Gl, [255, 255, 255, 255], 1, 1);
+        textures.Add(whiteTexture);
+        Dictionary<string, Renderer.Texture> textureByPath = [];
+
+        foreach (var objPart in objParts)
+        {
+            var texture = whiteTexture;
+            string? materialName = objPart.MaterialName;
+            bool twoSided = IsTwoSidedMaterial(materialName, null);
+            if (materialName is not null && materialTextures.TryGetValue(materialName, out var materialTexturePath))
+            {
+                twoSided = IsTwoSidedMaterial(materialName, materialTexturePath);
+                if (textureByPath.TryGetValue(materialTexturePath, out var existingTexture))
+                {
+                    texture = existingTexture;
+                }
+                else
+                {
+                    texture = new Renderer.Texture(clientContext.Gl, materialTexturePath);
+                    textureByPath[materialTexturePath] = texture;
+                    textures.Add(texture);
+                }
+            }
+
+            modelParts.Add(new ModelPart(texture, objPart.IndexStart, objPart.IndexCount, twoSided));
+        }
+    }
+
+    static bool IsTwoSidedMaterial(string? materialName, string? texturePath)
+    {
+        return materialName?.Contains("leaf", StringComparison.OrdinalIgnoreCase) == true
+            || Path.GetFileNameWithoutExtension(texturePath)?.Contains("leaf", StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+    static void LoadObj(string path, out float[] vertices, out uint[] indices, out List<ObjPart> objParts, out Dictionary<string, string> materialTextures)
     {
         List<Vector3> positions = [];
         List<Vector2> texCoords = [];
         List<float> vertexData = [];
         List<uint> indexData = [];
         Dictionary<string, uint> vertexLookup = [];
+        List<ObjPart> partsByMaterial = [];
+        Dictionary<string, string> textureByMaterial = [];
+        string? currentMaterial = null;
+        int currentPartStart = 0;
+        bool hasFacesInPart = false;
 
         foreach (string rawLine in File.ReadLines(path))
         {
@@ -102,6 +161,15 @@ public class ModelDrawInstruction : IDrawInstruction, IDisposable
             string[] parts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             switch (parts[0])
             {
+                case "mtllib":
+                    LoadMtl(path, parts, textureByMaterial);
+                    break;
+                case "usemtl":
+                    AddObjPart(partsByMaterial, currentMaterial, currentPartStart, indexData.Count, hasFacesInPart);
+                    currentMaterial = parts.Length > 1 ? parts[1] : null;
+                    currentPartStart = indexData.Count;
+                    hasFacesInPart = false;
+                    break;
                 case "v":
                     positions.Add(new Vector3(ParseFloat(parts[1]), ParseFloat(parts[2]), ParseFloat(parts[3])));
                     break;
@@ -110,12 +178,54 @@ public class ModelDrawInstruction : IDrawInstruction, IDisposable
                     break;
                 case "f":
                     AddFace(parts, positions, texCoords, vertexLookup, vertexData, indexData);
+                    hasFacesInPart = true;
                     break;
             }
         }
 
+        AddObjPart(partsByMaterial, currentMaterial, currentPartStart, indexData.Count, hasFacesInPart);
+
         vertices = [.. vertexData];
         indices = [.. indexData];
+        objParts = partsByMaterial.Count > 0 ? partsByMaterial : [new ObjPart(null, 0, (uint)indexData.Count)];
+        materialTextures = textureByMaterial;
+    }
+
+    static void AddObjPart(List<ObjPart> objParts, string? materialName, int start, int end, bool hasFaces)
+    {
+        if (hasFaces && end > start)
+            objParts.Add(new ObjPart(materialName, start, (uint)(end - start)));
+    }
+
+    static void LoadMtl(string objPath, string[] parts, Dictionary<string, string> textureByMaterial)
+    {
+        string objDirectory = Path.GetDirectoryName(objPath) ?? string.Empty;
+        foreach (string mtlFile in parts.Skip(1))
+        {
+            string mtlPath = Path.Combine(objDirectory, mtlFile);
+            if (!File.Exists(mtlPath))
+                continue;
+
+            string? currentMaterial = null;
+            string mtlDirectory = Path.GetDirectoryName(mtlPath) ?? string.Empty;
+            foreach (string rawLine in File.ReadLines(mtlPath))
+            {
+                string line = rawLine.Trim();
+                if (line.Length == 0 || line[0] == '#')
+                    continue;
+
+                string[] mtlParts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                switch (mtlParts[0])
+                {
+                    case "newmtl":
+                        currentMaterial = mtlParts.Length > 1 ? mtlParts[1] : null;
+                        break;
+                    case "map_Kd" when currentMaterial is not null && mtlParts.Length > 1:
+                        textureByMaterial[currentMaterial] = Path.Combine(mtlDirectory, mtlParts[1]);
+                        break;
+                }
+            }
+        }
     }
 
     static void AddFace(string[] parts, List<Vector3> positions, List<Vector2> texCoords, Dictionary<string, uint> vertexLookup, List<float> vertexData, List<uint> indexData)
@@ -164,4 +274,7 @@ public class ModelDrawInstruction : IDrawInstruction, IDisposable
     }
 
     static float ParseFloat(string value) => float.Parse(value, CultureInfo.InvariantCulture);
+
+    readonly record struct ModelPart(Renderer.Texture Texture, int IndexStart, uint IndexCount, bool TwoSided = false);
+    readonly record struct ObjPart(string? MaterialName, int IndexStart, uint IndexCount);
 }
