@@ -39,7 +39,7 @@ public class GameScene(ClientContext clientContext) : SceneBase(clientContext)
         PrefabConfig.FromFile(prefabsDir);
 
         Player = clientContext.World.Create(new PlayerTag(), new TransformComponent(new(220, 0, 220), 0.4f), new VelocityComponent(), new HeightmapColliderComponent(), new ModelRendererComponent(new(clientContext, Path.Combine(AppContext.BaseDirectory, "Assets", "player.obj"), Path.Combine(AppContext.BaseDirectory, "Assets", "player.png"))));
-        Tree = clientContext.World.Create(new TransformComponent(new(220, HeightmapDrawInstruction.Heightmap[220, 220], 220)), new ModelRendererComponent(new(clientContext, Path.Combine(AppContext.BaseDirectory, "Assets", "tree.obj"), Path.Combine(AppContext.BaseDirectory, "Assets", "tree.png"))));
+        Tree = clientContext.World.Create(new TransformComponent(new(220, HeightmapDrawInstruction.Heightmap[220, 220], 220), 0.05f), new ModelRendererComponent(new(clientContext, Path.Combine(AppContext.BaseDirectory, "Assets", "asd.obj"), Path.Combine(AppContext.BaseDirectory, "Assets", "leaf.png"))));
         clientContext.Player = Player;
     }
 
